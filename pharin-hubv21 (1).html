@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#111111">
+<meta name="theme-color" content="#002D72">
 <title>Dave's Hub</title>
 <style>
 :root {
-  --a1:#B84771; --a2:#D97199;
-  --grad:linear-gradient(135deg,#B84771,#D97199);
-  --bg:#FDF4F7; --surface:#fff; --surface2:#FCE7EE; --surface3:#F5C7D5;
-  --border:#F0DDE4; --text:#3A1F2C; --t2:#7A4A5C; --t3:#B58BA0;
-  --sh:0 1px 4px rgba(184,71,113,.08),0 2px 8px rgba(184,71,113,.05);
-  --sha:0 4px 20px rgba(184,71,113,.12),0 2px 8px rgba(184,71,113,.06);
-  --shx:0 8px 32px rgba(184,71,113,.16);
+  --a1:#002D72; --a2:#006BB6;
+  --grad:linear-gradient(135deg,#002D72,#006BB6);
+  --bg:#F2F6FB; --surface:#fff; --surface2:#E8F0FA; --surface3:#CFE0F2;
+  --border:#DCE7F5; --text:#0B1F3A; --t2:#3A5578; --t3:#7C93AE;
+  --sh:0 1px 4px rgba(0,45,114,.08),0 2px 8px rgba(0,45,114,.05);
+  --sha:0 4px 20px rgba(0,45,114,.12),0 2px 8px rgba(0,45,114,.06);
+  --shx:0 8px 32px rgba(0,45,114,.16);
   --r:14px; --rs:9px; --rl:22px; --nav:68px; --hdr:58px; --ticker:34px;
   --f:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
 }
@@ -23,9 +23,9 @@ html,body{
   height:100%;font-family:var(--f);color:var(--text);
   overflow:hidden;-webkit-font-smoothing:antialiased;
   background:
-    radial-gradient(900px 500px at 90% -10%,  #FCC9DA 0%, rgba(252,201,218,0) 60%),
-    radial-gradient(800px 700px at -10% 100%, #F9D6E2 0%, rgba(249,214,226,0) 60%),
-    radial-gradient(600px 400px at 50% 50%,   #FDE6EF 0%, rgba(253,230,239,0) 70%),
+    radial-gradient(900px 500px at 90% -10%,  #BFDCF5 0%, rgba(191,220,245,0) 60%),
+    radial-gradient(800px 700px at -10% 100%, #FFD9BF 0%, rgba(255,217,191,0) 60%),
+    radial-gradient(600px 400px at 50% 50%,   #EAF3FC 0%, rgba(234,243,252,0) 70%),
     var(--bg);
 }
 
@@ -167,9 +167,9 @@ html,body{
 
 /* pills */
 .p{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.1px}
-.p-want{background:#FDECF2;color:#7A4A5C} .p-prog{background:#F5C7D5;color:#3A1F2C}
-.p-done{background:#B84771;color:#fff} .p-must{background:#943A5C;color:#fff}
-.p-high{background:#FCE7EE;color:#7A4A5C} .p-some{background:#FDF4F7;color:#B58BA0}
+.p-want{background:#E8F0FA;color:#3A5578} .p-prog{background:#CFE0F2;color:#0B1F3A}
+.p-done{background:#002D72;color:#fff} .p-must{background:#FF5910;color:#fff}
+.p-high{background:#E8F0FA;color:#3A5578} .p-some{background:#F2F6FB;color:#7C93AE}
 .p-gen{background:var(--surface2);color:var(--t2)}
 
 /* ══════════ BROWSE ══════════ */
@@ -190,8 +190,8 @@ html,body{
 .bc-preview::-webkit-scrollbar{display:none}
 .bc-chip{background:var(--surface2);border:1px solid var(--border);border-radius:7px;
   padding:5px 10px;font-size:11px;font-weight:600;color:var(--t2);white-space:nowrap;flex-shrink:0}
-.bc-chip.done{background:#F5C7D5;color:#3A1F2C;border-color:#E8A4BC}
-.bc-chip.must{background:#943A5C;color:#fff;border-color:#7C2F4C}
+.bc-chip.done{background:#CFE0F2;color:#0B1F3A;border-color:#E8A4BC}
+.bc-chip.must{background:#FF5910;color:#fff;border-color:#7C2F4C}
 
 /* ══════════ CATEGORY SUBPAGE ══════════ */
 .cat-hero{color:#fff;padding:20px 16px 16px;margin-bottom:0}
@@ -430,9 +430,9 @@ html,body{
 /* ══════════ FIVE AGREEMENTS TICKER ══════════ */
 .ticker{
   position:fixed;top:var(--hdr);left:0;right:0;height:var(--ticker);z-index:190;
-  background:linear-gradient(90deg, rgba(252,201,218,.7), rgba(253,214,226,.65), rgba(252,201,218,.7));
+  background:linear-gradient(90deg, rgba(191,220,245,.7), rgba(207,224,242,.65), rgba(191,220,245,.7));
   backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(184,71,113,.15);
+  border-bottom:1px solid rgba(0,45,114,.15);
   display:flex;align-items:center;justify-content:center;
   padding:0 16px;overflow:hidden;
 }
@@ -442,11 +442,11 @@ html,body{
 }
 .ticker-num{
   font-family:var(--f);font-size:10.5px;font-weight:800;
-  color:#B84771;background:rgba(184,71,113,.14);
+  color:#002D72;background:rgba(0,45,114,.14);
   padding:2px 7px;border-radius:8px;letter-spacing:.4px;flex-shrink:0;
 }
 .ticker-txt{
-  font-size:12px;font-weight:700;color:#3A1F2C;letter-spacing:-.1px;
+  font-size:12px;font-weight:700;color:#0B1F3A;letter-spacing:-.1px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;
   transition:opacity .35s ease;
 }
@@ -479,14 +479,14 @@ html,body{
 
 /* softened logo mark so the white cat pops against pink */
 .logo-mark{width:32px !important;height:32px !important;border-radius:9px;
-  background:linear-gradient(135deg,#FCC9DA,#F5A6B8) !important;
+  background:linear-gradient(135deg,#BFDCF5,#FF5910) !important;
   display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;
-  box-shadow:0 2px 6px rgba(184,71,113,.18)}
+  box-shadow:0 2px 6px rgba(0,45,114,.18)}
 
 /* ══════════ DAILY PLANNER ══════════ */
 :root{
-  --pl-o:#D65E85;--pl-o-soft:#FCE1EA;
-  --pl-b:#E89DB8;--pl-b-soft:#FDECF2;
+  --pl-o:#FF5910;--pl-o-soft:#FFE4CC;
+  --pl-b:#006BB6;--pl-b-soft:#E8F0FA;
 }
 .pl-hero{
   background:var(--grad);border-radius:0 0 var(--rl) var(--rl);
@@ -564,8 +564,8 @@ html,body{
   background:var(--surface2);border:1px solid var(--border);cursor:pointer;
   transition:transform .12s,background .12s;}
 .pl-agree:active{transform:scale(.98)}
-.pl-agree.o{background:var(--pl-o-soft);border-color:rgba(214,94,133,.3)}
-.pl-agree.b{background:var(--pl-b-soft);border-color:rgba(232,157,184,.3)}
+.pl-agree.o{background:var(--pl-o-soft);border-color:rgba(255,89,16,.3)}
+.pl-agree.b{background:var(--pl-b-soft);border-color:rgba(0,107,182,.3)}
 .pl-agree.done{opacity:.55}
 .pl-agree-num{width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.06);
   display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--t2);flex-shrink:0}
@@ -579,13 +579,13 @@ html,body{
 .pl-agree.done.b .pl-agree-chk{background:var(--pl-b);border-color:var(--pl-b);color:#fff}
 .pl-prio-list{display:flex;flex-direction:column;gap:8px}
 .pl-prio{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
-.pl-prio.o{background:var(--pl-o-soft);border-color:rgba(214,94,133,.3)}
-.pl-prio.b{background:var(--pl-b-soft);border-color:rgba(232,157,184,.3)}
+.pl-prio.o{background:var(--pl-o-soft);border-color:rgba(255,89,16,.3)}
+.pl-prio.b{background:var(--pl-b-soft);border-color:rgba(0,107,182,.3)}
 .pl-prio-head{display:flex;align-items:center;gap:6px;margin-bottom:6px}
 .pl-prio-ico{font-size:16px}
 .pl-prio-label{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--t2)}
-.pl-prio.o .pl-prio-label{color:#A6416A}
-.pl-prio.b .pl-prio-label{color:#B45A80}
+.pl-prio.o .pl-prio-label{color:#B34A0A}
+.pl-prio.b .pl-prio-label{color:#004B8D}
 .pl-prio textarea{width:100%;border:none;background:transparent;font-family:var(--f);font-size:13px;
   line-height:1.45;color:var(--text);resize:vertical;min-height:44px;outline:none}
 .pl-prio textarea::placeholder{color:var(--t3)}
@@ -597,7 +597,7 @@ html,body{
 .pl-leg textarea{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
   padding:8px 10px;font-family:var(--f);font-size:12.5px;line-height:1.4;color:var(--text);
   resize:vertical;min-height:34px;outline:none}
-.pl-leg.now textarea{background:var(--pl-o-soft);border-color:rgba(214,94,133,.35)}
+.pl-leg.now textarea{background:var(--pl-o-soft);border-color:rgba(255,89,16,.35)}
 .pl-leg textarea:focus{border-color:var(--a1)}
 .pl-check-block{background:var(--surface2);border-radius:10px;padding:11px 12px;margin-bottom:9px}
 .pl-check-block.b{background:var(--pl-b-soft)}
@@ -618,7 +618,7 @@ html,body{
   color:var(--t3);font-family:var(--f);font-size:10.5px;font-weight:700;letter-spacing:.3px;
   padding:6px 10px;cursor:pointer;width:100%;text-transform:uppercase}
 .pl-add-mini:active{border-color:var(--a1);color:var(--a1)}
-.pl-highlight{background:var(--pl-o-soft);border:1px solid rgba(214,94,133,.3);border-radius:10px;
+.pl-highlight{background:var(--pl-o-soft);border:1px solid rgba(255,89,16,.3);border-radius:10px;
   padding:11px 12px;display:flex;gap:9px;align-items:flex-start}
 .pl-highlight::before{content:"🌱";font-size:18px;line-height:1.1}
 .pl-highlight textarea{flex:1;border:none;background:transparent;font-family:var(--f);font-size:13px;
@@ -630,9 +630,9 @@ html,body{
 .pl-num-row input[type=text]{flex:1;border:none;border-bottom:1px solid var(--border);background:transparent;
   font-family:var(--f);font-size:12.5px;color:var(--text);padding:5px 2px;outline:none}
 .pl-num-row input[type=text]:focus{border-bottom-color:var(--a1)}
-.pl-notes{background:var(--pl-b-soft);border:1px solid rgba(232,157,184,.3);border-radius:10px;
+.pl-notes{background:var(--pl-b-soft);border:1px solid rgba(0,107,182,.3);border-radius:10px;
   padding:11px 12px;margin-top:12px}
-.pl-notes-lbl{font-size:10.5px;font-weight:800;color:#B45A80;letter-spacing:.4px;
+.pl-notes-lbl{font-size:10.5px;font-weight:800;color:#004B8D;letter-spacing:.4px;
   text-transform:uppercase;margin-bottom:6px}
 .pl-notes textarea{width:100%;border:none;background:transparent;font-family:var(--f);font-size:12.5px;
   line-height:1.45;color:var(--text);resize:vertical;min-height:60px;outline:none}
@@ -666,9 +666,9 @@ html,body{
 }
 .side-brand-mark{
   width:40px;height:40px;border-radius:10px;
-  background:linear-gradient(135deg,#FCC9DA,#F5A6B8);
+  background:linear-gradient(135deg,#BFDCF5,#FF5910);
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  box-shadow:0 2px 6px rgba(184,71,113,.18);
+  box-shadow:0 2px 6px rgba(0,45,114,.18);
 }
 .side-brand-mark svg{width:26px;height:26px;display:block}
 .side-brand-txt{min-width:0;flex:1}
@@ -689,11 +689,11 @@ html,body{
 }
 .side-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;
   stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.side-btn:hover{background:rgba(184,71,113,.06);color:var(--text)}
-.side-btn.active{background:rgba(184,71,113,.14);color:var(--a1);font-weight:700}
+.side-btn:hover{background:rgba(0,45,114,.06);color:var(--text)}
+.side-btn.active{background:rgba(0,45,114,.14);color:var(--a1);font-weight:700}
 .side-btn-primary{
   margin-top:auto;background:var(--grad);color:#fff;font-weight:700;
-  justify-content:center;box-shadow:0 4px 12px rgba(184,71,113,.28);
+  justify-content:center;box-shadow:0 4px 12px rgba(0,45,114,.28);
 }
 .side-btn-primary:hover{background:var(--grad);opacity:.92;color:#fff}
 .side-btn-primary svg{stroke:#fff}
@@ -723,7 +723,7 @@ html,body{
 
   /* nicer scrollbars for main content */
   .main::-webkit-scrollbar{ width:10px }
-  .main::-webkit-scrollbar-thumb{ background:rgba(184,71,113,.28); border-radius:6px }
+  .main::-webkit-scrollbar-thumb{ background:rgba(0,45,114,.28); border-radius:6px }
   .main::-webkit-scrollbar-track{ background:transparent }
 }
 
@@ -742,17 +742,17 @@ html,body{
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M5.5 8.5 L6.8 3 L10.5 7.2 Z" fill="#fff"/>
         <path d="M18.5 8.5 L17.2 3 L13.5 7.2 Z" fill="#fff"/>
-        <path d="M7.2 6.5 L7.8 4.5 L9 6.8 Z" fill="#F5A6B8"/>
-        <path d="M16.8 6.5 L16.2 4.5 L15 6.8 Z" fill="#F5A6B8"/>
+        <path d="M7.2 6.5 L7.8 4.5 L9 6.8 Z" fill="#FF5910"/>
+        <path d="M16.8 6.5 L16.2 4.5 L15 6.8 Z" fill="#FF5910"/>
         <ellipse cx="12" cy="13.5" rx="6.4" ry="5.8" fill="#fff"/>
         <circle cx="8.5" cy="15.5" r="0.9" fill="#FCD5E0" opacity=".7"/>
         <circle cx="15.5" cy="15.5" r="0.9" fill="#FCD5E0" opacity=".7"/>
-        <circle cx="10" cy="13.2" r="0.75" fill="#3A1F2C"/>
-        <circle cx="14" cy="13.2" r="0.75" fill="#3A1F2C"/>
-        <path d="M11.4 15.2 L12.6 15.2 L12 16 Z" fill="#D97199"/>
-        <path d="M8.5 3.5 Q6.5 2.5 6.5 4.8 Q6.5 6 8.8 4.8 Z" fill="#D97199"/>
-        <path d="M15.5 3.5 Q17.5 2.5 17.5 4.8 Q17.5 6 15.2 4.8 Z" fill="#D97199"/>
-        <circle cx="12" cy="4.2" r="1.3" fill="#B84771"/>
+        <circle cx="10" cy="13.2" r="0.75" fill="#0B1F3A"/>
+        <circle cx="14" cy="13.2" r="0.75" fill="#0B1F3A"/>
+        <path d="M11.4 15.2 L12.6 15.2 L12 16 Z" fill="#006BB6"/>
+        <path d="M8.5 3.5 Q6.5 2.5 6.5 4.8 Q6.5 6 8.8 4.8 Z" fill="#006BB6"/>
+        <path d="M15.5 3.5 Q17.5 2.5 17.5 4.8 Q17.5 6 15.2 4.8 Z" fill="#006BB6"/>
+        <circle cx="12" cy="4.2" r="1.3" fill="#002D72"/>
       </svg>
     </div>
     <div class="side-brand-txt">
@@ -776,6 +776,10 @@ html,body{
   <button class="side-btn" data-screen="search">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     Search
+  </button>
+  <button class="side-btn" data-screen="tiktok">
+    <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    TikTok Search
   </button>
   <button class="side-btn" data-screen="io">
     <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -802,17 +806,17 @@ html,body{
         <svg viewBox="0 0 24 24" aria-hidden="true" style="width:22px;height:22px;display:block">
           <path d="M5.5 8.5 L6.8 3 L10.5 7.2 Z" fill="#fff"/>
           <path d="M18.5 8.5 L17.2 3 L13.5 7.2 Z" fill="#fff"/>
-          <path d="M7.2 6.5 L7.8 4.5 L9 6.8 Z" fill="#F5A6B8"/>
-          <path d="M16.8 6.5 L16.2 4.5 L15 6.8 Z" fill="#F5A6B8"/>
+          <path d="M7.2 6.5 L7.8 4.5 L9 6.8 Z" fill="#FF5910"/>
+          <path d="M16.8 6.5 L16.2 4.5 L15 6.8 Z" fill="#FF5910"/>
           <ellipse cx="12" cy="13.5" rx="6.4" ry="5.8" fill="#fff"/>
           <circle cx="8.5" cy="15.5" r="0.9" fill="#FCD5E0" opacity=".7"/>
           <circle cx="15.5" cy="15.5" r="0.9" fill="#FCD5E0" opacity=".7"/>
-          <circle cx="10" cy="13.2" r="0.75" fill="#3A1F2C"/>
-          <circle cx="14" cy="13.2" r="0.75" fill="#3A1F2C"/>
-          <path d="M11.4 15.2 L12.6 15.2 L12 16 Z" fill="#D97199"/>
-          <path d="M8.5 3.5 Q6.5 2.5 6.5 4.8 Q6.5 6 8.8 4.8 Z" fill="#D97199"/>
-          <path d="M15.5 3.5 Q17.5 2.5 17.5 4.8 Q17.5 6 15.2 4.8 Z" fill="#D97199"/>
-          <circle cx="12" cy="4.2" r="1.3" fill="#B84771"/>
+          <circle cx="10" cy="13.2" r="0.75" fill="#0B1F3A"/>
+          <circle cx="14" cy="13.2" r="0.75" fill="#0B1F3A"/>
+          <path d="M11.4 15.2 L12.6 15.2 L12 16 Z" fill="#006BB6"/>
+          <path d="M8.5 3.5 Q6.5 2.5 6.5 4.8 Q6.5 6 8.8 4.8 Z" fill="#006BB6"/>
+          <path d="M15.5 3.5 Q17.5 2.5 17.5 4.8 Q17.5 6 15.2 4.8 Z" fill="#006BB6"/>
+          <circle cx="12" cy="4.2" r="1.3" fill="#002D72"/>
         </svg>
       </div>
       <div class="app-name" id="hdr-name">Pharin Hub</div>
@@ -839,17 +843,17 @@ html,body{
            style="position:absolute;top:14px;right:14px;width:56px;height:56px;opacity:.95;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15))">
         <path d="M5.5 8.5 L6.8 3 L10.5 7.2 Z" fill="#fff"/>
         <path d="M18.5 8.5 L17.2 3 L13.5 7.2 Z" fill="#fff"/>
-        <path d="M7.2 6.5 L7.8 4.5 L9 6.8 Z" fill="#F5A6B8"/>
-        <path d="M16.8 6.5 L16.2 4.5 L15 6.8 Z" fill="#F5A6B8"/>
+        <path d="M7.2 6.5 L7.8 4.5 L9 6.8 Z" fill="#FF5910"/>
+        <path d="M16.8 6.5 L16.2 4.5 L15 6.8 Z" fill="#FF5910"/>
         <ellipse cx="12" cy="13.5" rx="6.4" ry="5.8" fill="#fff"/>
         <circle cx="8.5" cy="15.5" r="0.9" fill="#FCD5E0" opacity=".7"/>
         <circle cx="15.5" cy="15.5" r="0.9" fill="#FCD5E0" opacity=".7"/>
-        <circle cx="10" cy="13.2" r="0.75" fill="#3A1F2C"/>
-        <circle cx="14" cy="13.2" r="0.75" fill="#3A1F2C"/>
-        <path d="M11.4 15.2 L12.6 15.2 L12 16 Z" fill="#D97199"/>
-        <path d="M8.5 3.5 Q6.5 2.5 6.5 4.8 Q6.5 6 8.8 4.8 Z" fill="#D97199"/>
-        <path d="M15.5 3.5 Q17.5 2.5 17.5 4.8 Q17.5 6 15.2 4.8 Z" fill="#D97199"/>
-        <circle cx="12" cy="4.2" r="1.3" fill="#B84771"/>
+        <circle cx="10" cy="13.2" r="0.75" fill="#0B1F3A"/>
+        <circle cx="14" cy="13.2" r="0.75" fill="#0B1F3A"/>
+        <path d="M11.4 15.2 L12.6 15.2 L12 16 Z" fill="#006BB6"/>
+        <path d="M8.5 3.5 Q6.5 2.5 6.5 4.8 Q6.5 6 8.8 4.8 Z" fill="#006BB6"/>
+        <path d="M15.5 3.5 Q17.5 2.5 17.5 4.8 Q17.5 6 15.2 4.8 Z" fill="#006BB6"/>
+        <circle cx="12" cy="4.2" r="1.3" fill="#002D72"/>
       </svg>
       <div class="dh-greeting">Welcome back 👋</div>
       <div class="dh-name" id="dh-name">Pharin</div>
@@ -870,6 +874,7 @@ html,body{
       <div class="qa" onclick="goScreen('planner')"><em>📅</em> Today's Plan</div>
       <div class="qa" onclick="surpriseMe()"><em>🎲</em> Surprise Me</div>
       <div class="qa" onclick="goScreen('search')"><em>🔎</em> Search</div>
+      <div class="qa" onclick="goScreen('tiktok')"><em>🎵</em> TikTok</div>
       <div class="qa" onclick="goScreen('io')"><em>📤</em> Import/Export</div>
       <div class="qa" onclick="filterMust()"><em>🔥</em> Must Do</div>
     </div>
@@ -974,6 +979,23 @@ html,body{
         </div>
       </div>
       <div id="io-res"></div>
+    </div>
+  </div>
+
+  <!-- TIKTOK SEARCH -->
+  <div class="screen" id="scr-tiktok">
+    <div class="pad">
+      <div class="sec-row" style="padding:0 0 4px 0"><div class="sec-lbl">🎵 TikTok Search</div></div>
+      <div class="search-row" style="margin-bottom:10px">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="tt-q" type="text" placeholder="Search TikTok…" onkeydown="if(event.key==='Enter'){ttSearch();}">
+      </div>
+      <div class="io-btn-row" style="margin-bottom:18px">
+        <button class="btn btn-pri btn-sm" onclick="ttSearch()">🔍 Search TikTok</button>
+        <button class="btn btn-out btn-sm" onclick="ttSave()">💾 Save Search</button>
+      </div>
+      <div class="sec-row"><div class="sec-lbl">Saved Searches</div></div>
+      <div id="tt-saved-list"></div>
     </div>
   </div>
 
@@ -1182,12 +1204,12 @@ html,body{
 
 // ═══════ THEMES ═══════
 const THEMES=[
-  {l:'Rose',    a:'#B84771',b:'#D97199'},{l:'Blush',   a:'#C85476',b:'#E89DB8'},
-  {l:'Cherry',  a:'#A73B63',b:'#CB5680'},{l:'Peony',   a:'#B15079',b:'#D97199'},
-  {l:'Coral',   a:'#C4536F',b:'#E88BA4'},{l:'Berry',   a:'#943A5C',b:'#B65479'},
-  {l:'Petal',   a:'#C56185',b:'#EBB0C4'},{l:'Magenta', a:'#B03A75',b:'#D662A0'},
-  {l:'Ballet',  a:'#B85E82',b:'#DDA1B8'},{l:'Rosé',    a:'#A94A6E',b:'#D48098'},
-  {l:'Watermelon',a:'#CC4F73',b:'#E77997'},{l:'Fuchsia',a:'#A63B8A',b:'#C965AA'},
+  {l:'Knicks/Mets', a:'#002D72',b:'#006BB6'},{l:'Mets Orange',  a:'#FF5910',b:'#002D72'},
+  {l:'Knicks Orange',a:'#F58426',b:'#006BB6'},{l:'Garden Blue', a:'#004B8D',b:'#0077C8'},
+  {l:'Shea Stadium', a:'#002D72',b:'#FF5910'},{l:'Uptown Blue', a:'#003F7D',b:'#1E88C7'},
+  {l:'Flushing Orange',a:'#E2571C',b:'#FF7A33'},{l:'MSG Navy',  a:'#00275C',b:'#004B91'},
+  {l:'Amazin Blue',  a:'#0B3D91',b:'#1560BD'},{l:'Bleacher Orange',a:'#FF6B1A',b:'#FFA359'},
+  {l:'Championship', a:'#002D72',b:'#F58426'},{l:'Two-Tone',   a:'#006BB6',b:'#FF5910'},
 ];
 const ICONS=['🍽️','🎬','📚','🎉','🎯','🛍️','🎵','🌍','💪','🎨','🍷','☕','🌸','⚡','🎭','🦋','🏔️','🎸','🏊','🚀','🎮','🌿'];
 const PLATFORMS=['Netflix','Hulu','Disney+','HBO Max','Amazon','Apple TV+','YouTube','Theater','Cinema','Other'];
@@ -1199,25 +1221,25 @@ let cfg=lCfg();
 
 // ═══════ CATEGORIES ═══════
 const DEF_CATS=[
-  {id:'place',   name:'Places',       icon:'🍽️',ca:'#B84771',cb:'#D97199',
+  {id:'place',   name:'Places',       icon:'🍽️',ca:'#002D72',cb:'#006BB6',
    subs:['Restaurant','Lounge','Speakeasy','Bar','Café','Farmers Market','Winery','Museum','Park','Hotel','Food Truck','Spa','Other'],
    sl:{want:'Want to Go',prog:'Booked',done:'Visited'},ef:['city','address','website','dn','kid','indoor','outdoor']},
-  {id:'movie',   name:'Movies & Shows',icon:'🎬',ca:'#A63B8A',cb:'#C965AA',
+  {id:'movie',   name:'Movies & Shows',icon:'🎬',ca:'#FF5910',cb:'#F58426',
    subs:['Film','Series','Documentary','Anime','Stand-Up','Mini-Series','Reality TV','Short Film'],
    sl:{want:'Want to Watch',prog:'Watching',done:'Watched'},ef:['platform','genre']},
-  {id:'book',    name:'Books',         icon:'📚',ca:'#A73B63',cb:'#CB5680',
+  {id:'book',    name:'Books',         icon:'📚',ca:'#004B8D',cb:'#0077C8',
    subs:['Romance','Thriller','Fantasy','Mystery','Self-Help','Biography','Sci-Fi','Historical','Horror','Poetry','Non-Fiction'],
    sl:{want:'Want to Read',prog:'Reading',done:'Finished'},ef:['author','pages']},
-  {id:'event',   name:'Events',        icon:'🎉',ca:'#C4536F',cb:'#E88BA4',
+  {id:'event',   name:'Events',        icon:'🎉',ca:'#E2571C',cb:'#FF7A33',
    subs:['Concert','Festival','Comedy Show','Sports','Art Show','Theater','Food Event','Market','Pop-Up'],
    sl:{want:'Interested',prog:'Have Tickets',done:'Attended'},ef:['city','eventDate','venue','website']},
-  {id:'activity',name:'Activities',    icon:'🎯',ca:'#B15079',cb:'#D97199',
+  {id:'activity',name:'Activities',    icon:'🎯',ca:'#003F7D',cb:'#1E88C7',
    subs:['Outdoor','Indoor','Spa','Class','Travel','Adventure','Sport','Tour','Workshop'],
    sl:{want:'Want to Try',prog:'Planned',done:'Done'},ef:['city','website']},
-  {id:'shopping',name:'Shopping',      icon:'🛍️',ca:'#B85E82',cb:'#DDA1B8',
+  {id:'shopping',name:'Shopping',      icon:'🛍️',ca:'#FF6B1A',cb:'#FFA359',
    subs:['Boutique','Market','Online','Thrift','Pop-Up','Mall','Designer'],
    sl:{want:'Wishlist',prog:'Planning',done:'Purchased'},ef:['website','cost']},
-  {id:'music',   name:'Music',         icon:'🎵',ca:'#943A5C',cb:'#B65479',
+  {id:'music',   name:'Music',         icon:'🎵',ca:'#00275C',cb:'#004B91',
    subs:['Album','Artist','Playlist','Concert Tour','Podcast','EP'],
    sl:{want:'Want to Hear',prog:'Listening',done:'Loved It'},ef:['platform']},
 ];
@@ -1228,7 +1250,7 @@ function migrateCategoryColors(list){
   let changed = false;
   list.forEach(c=>{
     if(isGray(c.ca) || isGray(c.cb)){
-      const target = map[c.id] || {ca:'#B84771',cb:'#D97199'};
+      const target = map[c.id] || {ca:'#002D72',cb:'#006BB6'};
       c.ca = target.ca; c.cb = target.cb;
       changed = true;
     }
@@ -1307,6 +1329,7 @@ function goScreen(s,btn){
   if(s==='search'){renderTypeChips();doSearch();}
   if(s==='settings') renderSettings();
   if(s==='planner') renderPlanner();
+  if(s==='tiktok') renderTiktok();
 }
 
 function openCat(id){
@@ -1954,6 +1977,42 @@ function importCSV(){
 
 function parseL(l){const r=[];let c='';let q=false;for(let i=0;i<l.length;i++){if(l[i]==='"'){q=!q;}else if(l[i]===','&&!q){r.push(c);c='';}else c+=l[i];}r.push(c);return r;}
 function esc(s){return(s||'').replace(/'/g,"\\'");}
+
+// ═══════ TIKTOK SEARCH ═══════
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function ttLoad(){try{return JSON.parse(localStorage.getItem('ahub-tiktok-saved')||'[]');}catch(e){return [];}}
+function ttStore(list){localStorage.setItem('ahub-tiktok-saved',JSON.stringify(list));}
+function ttSearch(){
+  const q=(document.getElementById('tt-q').value||'').trim();
+  if(!q){showToast('⚠️ Enter a search term');return;}
+  window.open('https://www.tiktok.com/search?q='+encodeURIComponent(q),'_blank');
+}
+function ttSave(){
+  const q=(document.getElementById('tt-q').value||'').trim();
+  if(!q){showToast('⚠️ Enter a search term to save');return;}
+  let saved=ttLoad();
+  if(saved.includes(q)){showToast('Already saved');return;}
+  saved.unshift(q);ttStore(saved);showToast('💾 Saved!');renderTiktok();
+}
+function ttRun(q){window.open('https://www.tiktok.com/search?q='+encodeURIComponent(q),'_blank');}
+function ttDelete(i){let saved=ttLoad();saved.splice(i,1);ttStore(saved);renderTiktok();}
+function renderTiktok(){
+  const saved=ttLoad();
+  const el=document.getElementById('tt-saved-list');
+  if(!el)return;
+  el.innerHTML=saved.length?saved.map((q,i)=>`
+    <div class="fc" style="cursor:default">
+      <div class="fc-stripe" style="background:linear-gradient(to bottom,var(--a1),var(--a2))"></div>
+      <div class="fc-inner" style="align-items:center">
+        <div class="fc-thumb-ph" style="background:linear-gradient(135deg,var(--a1),var(--a2))">🎵</div>
+        <div class="fc-info"><div class="fc-title">${escHtml(q)}</div></div>
+        <div class="fc-r" style="flex-direction:row;gap:8px">
+          <button class="ec-act-btn" onclick="ttRun('${esc(q)}')" title="Search">🔍</button>
+          <button class="ec-act-btn" onclick="ttDelete(${i})" title="Remove">🗑️</button>
+        </div>
+      </div>
+    </div>`).join(''):`<div style="text-align:center;padding:30px;color:var(--t2);font-size:13px">No saved searches yet</div>`;
+}
 
 // ═══════ TOAST ═══════
 let _tt;
