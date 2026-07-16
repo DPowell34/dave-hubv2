@@ -274,10 +274,12 @@ categoriesRouter.post("/api/categories/ensure", async (req, res) => {
       const done = String(sl.done || "Done");
       const icon = String(cat.icon || "🗂️");
 
+      // No `icon`: Notion validates icon.emoji against a fixed enum and rejects
+      // anything outside it (🧪 failed), which would block creating the database
+      // over a decoration. The title already carries the emoji.
       const db: any = await notion.databases.create({
         parent: { type: "page_id", page_id: pageId },
-        icon: { type: "emoji", emoji: icon } as any,
-        title: [{ type: "text", text: { content: `${icon} ${name}` } }],
+        title: [{ type: "text", text: { content: `${icon} ${name}`.trim() } }],
         description: [{ type: "text", text: { content: `Dave's Hub — ${name} category. Mirrors Browse › ${name} on romeobravos.net.` } }],
         properties: {
           Name: { title: {} },
