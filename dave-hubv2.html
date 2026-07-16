@@ -2740,6 +2740,79 @@ async function plSyncNotionPriorities(){
   }catch(_){ /* offline — keep whatever is on screen */ }
 }
 
+/**
+ * Daily Checklists + End of Day Review from Master Planner.
+ *
+ * Notion -> app only: pushing the other way would need a public write endpoint
+ * on a site with no auth, so Notion is the source of truth. Tick in Notion and
+ * it lands here within 5 minutes.
+ *
+ * Manual edits still win, using the same rule as the schedule and priorities
+ * syncs: only overwrite what is empty/unchanged since the last sync. Checklist
+ * items match on TEXT WITHIN THEIR SECTION — "Walk Broly / Water" exists in all
+ * three, and today's Morning has fewer items than the template, so matching by
+ * text alone or by index both go wrong.
+ */
+async function plSyncNotionDaily(){
+  try{
+    const res = await fetch('https://planner.romeobravos.net/api/daily', {cache:'no-store'});
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!data || !data.found) return;
+    if(!plState.dailySyncedFrom) plState.dailySyncedFrom = {checks:{}, review:{}};
+    let changed = false;
+
+    // ── checklists ──
+    ['morning','afternoon','evening'].forEach(part=>{
+      const remote = (data.checks && data.checks[part]) || [];
+      if(!remote.length) return;
+      const seen = plState.dailySyncedFrom.checks[part] || (plState.dailySyncedFrom.checks[part] = {});
+      remote.forEach(r=>{
+        const key = String(r.t||'').trim().toLowerCase();
+        if(!key) return;
+        const local = (plState.checks[part]||[]).find(x => String(x.t||'').trim().toLowerCase() === key);
+        if(local){
+          const last = seen[key];
+          // Only follow Notion if the box here hasn't been touched since last sync.
+          if((last === undefined || local.d === last) && local.d !== r.d){ local.d = r.d; changed = true; }
+        } else {
+          // Item added in Notion — bring it across rather than silently ignore it.
+          plState.checks[part].push({t:r.t, d:r.d}); changed = true;
+        }
+        seen[key] = r.d;
+      });
+    });
+
+    // ── end of day review ──
+    const rv = data.review || {};
+    const seenR = plState.dailySyncedFrom.review;
+    const takeText = (field)=>{
+      const val = String(rv[field]||'').trim();
+      const cur = String(plState.review[field]||'');
+      const last = seenR[field];
+      if(val && (cur === '' || (last !== undefined && cur === last)) && cur !== val){
+        plState.review[field] = val; changed = true;
+      }
+      seenR[field] = val;
+    };
+    takeText('highlight'); takeText('notes');
+    ['enjoyed','notEnjoyed','challenges','changes'].forEach(field=>{
+      const arr = Array.isArray(rv[field]) ? rv[field] : [];
+      const lastArr = seenR[field] || [];
+      arr.forEach((val,i)=>{
+        const v = String(val||'').trim();
+        const cur = String((plState.review[field]||[])[i] || '');
+        if(v && (cur === '' || cur === (lastArr[i]||'')) && cur !== v){
+          plState.review[field][i] = v; changed = true;
+        }
+      });
+      seenR[field] = arr.map(x=>String(x||'').trim());
+    });
+
+    if(changed){ plRenderChecklists(); plRenderReview(); plScheduleSave(); }
+  }catch(_){ /* offline — keep what's on screen */ }
+}
+
 async function plSyncNotionSchedule(){
   const dpEl = document.getElementById("pl-datepick");
   const iso = dpEl ? dpEl.value : plTodayISO();
@@ -2800,6 +2873,7 @@ function renderPlanner(){
   plLoad(document.getElementById("pl-datepick").value);
   plSyncNotionSchedule();
   plSyncNotionPriorities();
+  plSyncNotionDaily();
 }
 function plShiftDay(delta){
   const d = new Date(document.getElementById("pl-datepick").value+"T12:00:00");
@@ -2852,7 +2926,7 @@ setInterval(()=>{ if(curScreen==='planner') plRenderSchedule(); }, 60000);
 // Kept sequential and screen-gated: two staggered calls are fine, but fanning out
 // concurrently against Notion's ~3 req/sec budget is what timed out today-schedule.
 const PL_SYNC_MS = 5*60*1000;
-setInterval(()=>{ if(curScreen==='planner' && !document.hidden){ plSyncNotionSchedule(); plSyncNotionPriorities(); } }, PL_SYNC_MS);
+setInterval(()=>{ if(curScreen==='planner' && !document.hidden){ plSyncNotionSchedule(); plSyncNotionPriorities(); plSyncNotionDaily(); } }, PL_SYNC_MS);
 setInterval(()=>{ if(curScreen==='planner' && !document.hidden) plRenderCalendar(); }, PL_SYNC_MS);
 // A phone that slept should not show stale hours on wake.
 document.addEventListener('visibilitychange',()=>{
