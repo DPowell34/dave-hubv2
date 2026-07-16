@@ -1363,6 +1363,10 @@ html,body{
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
     Home
   </button>
+  <button class="ni" id="ni-command" onclick="goScreen('command',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><path d="M4.9 4.9l2.9 2.9M16.2 16.2l2.9 2.9M19.1 4.9l-2.9 2.9M7.8 16.2l-2.9 2.9"/></svg>
+    Command
+  </button>
   <button class="ni" id="ni-browse" onclick="goScreen('browse',this)">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     Browse
@@ -1805,7 +1809,7 @@ function goScreen(s,btn){
   document.getElementById('page-title').style.display='none';
   document.querySelector('.main').scrollTop=0;
   prevScreen=curScreen; curScreen=s;
-  const niMap={home:'ni-home',browse:'ni-browse',planner:'ni-planner',search:'ni-search',settings:'ni-settings',io:null};
+  const niMap={home:'ni-home',command:'ni-command',browse:'ni-browse',planner:'ni-planner',search:'ni-search',settings:'ni-settings',io:null};
   if(btn) btn.classList.add('active');
   else if(niMap[s]) document.getElementById(niMap[s])&&document.getElementById(niMap[s]).classList.add('active');
   if(s==='home'){renderHome();document.getElementById('ni-home').classList.add('active');}
@@ -2706,6 +2710,36 @@ function plNotionSyncStatus(kind, label){
   const colors = { ok:"#16A34A", pending:"#9CA3AF", err:"#DC2626" };
   el.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:'+(colors[kind]||colors.pending)+';display:inline-block"></span> Notion · '+label;
 }
+/**
+ * Planner priorities were localStorage-only while the Command Center read
+ * Work/Learn/Play from Master Planner, so the two could never agree. Both now
+ * read the same Notion source.
+ *
+ * Manual edits win, using the same rule as the schedule sync: only overwrite a
+ * field that is empty or still equals what Notion last gave us.
+ */
+async function plSyncNotionPriorities(){
+  try{
+    const res = await fetch('https://planner.romeobravos.net/api/command-center', {cache:'no-store'});
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!data || !Array.isArray(data.priorities) || !data.priorities.length) return;
+    if(!plState.prioritiesSyncedFrom) plState.prioritiesSyncedFrom = {};
+    let changed = false;
+    data.priorities.forEach(p=>{
+      const key = String(p.kind||'').toLowerCase();
+      if(!PL_PRIO_CATS.some(c=>c.key===key)) return;
+      const val = String(p.text||'').trim();
+      const current = plState.priorities[key] || "";
+      const lastSynced = plState.prioritiesSyncedFrom[key];
+      const safeToOverwrite = current === "" || (lastSynced !== undefined && current === lastSynced);
+      if(safeToOverwrite && current !== val){ plState.priorities[key] = val; changed = true; }
+      plState.prioritiesSyncedFrom[key] = val;
+    });
+    if(changed){ plRenderPriorities(); plScheduleSave(); }
+  }catch(_){ /* offline — keep whatever is on screen */ }
+}
+
 async function plSyncNotionSchedule(){
   const dpEl = document.getElementById("pl-datepick");
   const iso = dpEl ? dpEl.value : plTodayISO();
@@ -2765,6 +2799,7 @@ function renderPlanner(){
   }
   plLoad(document.getElementById("pl-datepick").value);
   plSyncNotionSchedule();
+  plSyncNotionPriorities();
 }
 function plShiftDay(delta){
   const d = new Date(document.getElementById("pl-datepick").value+"T12:00:00");
@@ -2817,7 +2852,7 @@ setInterval(()=>{ if(curScreen==='planner') plRenderSchedule(); }, 60000);
 // Kept sequential and screen-gated: two staggered calls are fine, but fanning out
 // concurrently against Notion's ~3 req/sec budget is what timed out today-schedule.
 const PL_SYNC_MS = 5*60*1000;
-setInterval(()=>{ if(curScreen==='planner' && !document.hidden) plSyncNotionSchedule(); }, PL_SYNC_MS);
+setInterval(()=>{ if(curScreen==='planner' && !document.hidden){ plSyncNotionSchedule(); plSyncNotionPriorities(); } }, PL_SYNC_MS);
 setInterval(()=>{ if(curScreen==='planner' && !document.hidden) plRenderCalendar(); }, PL_SYNC_MS);
 // A phone that slept should not show stale hours on wake.
 document.addEventListener('visibilitychange',()=>{
