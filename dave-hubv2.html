@@ -2822,7 +2822,7 @@ function plRenderPriorities(){
       '<textarea placeholder="What matters here today…"></textarea>';
     const ta = col.querySelector("textarea");
     ta.value = plState.priorities[c.key] || "";
-    ta.oninput = ()=>{ plState.priorities[c.key] = ta.value; plScheduleSave(); };
+    ta.oninput = ()=>{ plState.priorities[c.key] = ta.value; plScheduleSave(); plPushNotion(); };
     wrap.append(col);
   });
 }
@@ -2836,7 +2836,7 @@ function plRenderChecklists(){
       row.className = "pl-check-row"+(item.d?" done":"");
       const chk = document.createElement("input");
       chk.type = "checkbox"; chk.checked = item.d;
-      chk.onchange = ()=>{ item.d = chk.checked; plRenderChecklists(); plScheduleSave(); };
+      chk.onchange = ()=>{ item.d = chk.checked; plRenderChecklists(); plScheduleSave(); plPushNotion(); };
       const txt = document.createElement("input");
       txt.type = "text"; txt.value = item.t; txt.placeholder = "Item…";
       txt.oninput = ()=>{ item.t = txt.value; plScheduleSave(); };
@@ -2913,6 +2913,53 @@ async function plSyncNotionPriorities(){
  * three, and today's Morning has fewer items than the template, so matching by
  * text alone or by index both go wrong.
  */
+/**
+ * Push planner state (checks, review, priorities) to Notion.
+ *
+ * Debounced: ticking three boxes in a row is one write, not three, and each
+ * write costs a Master Planner block walk on a ~3 req/sec budget shared with
+ * every other sync.
+ *
+ * Only fires for TODAY — the Notion page only has a section for today, so
+ * back-dated edits have nowhere to land and are kept local rather than written
+ * to the wrong day.
+ */
+let _plPushTimer = null;
+function plPushNotion(){
+  if(!wkGet()) return;                                   // no key -> stays on device
+  if(document.getElementById("pl-datepick").value !== plTodayISO()) return;
+  clearTimeout(_plPushTimer);
+  _plPushTimer = setTimeout(async ()=>{
+    try{
+      const res = await fetch('https://planner.romeobravos.net/api/daily', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+wkGet()},
+        body: JSON.stringify({
+          checks: plState.checks,
+          review: plState.review,
+          priorities: plState.priorities
+        })
+      });
+      if(res.status === 401){ plNotionSyncStatus('err','Key rejected'); return; }
+      if(!res.ok){ plNotionSyncStatus('err','Write failed'); return; }
+      const d = await res.json();
+      // Record what Notion now holds so the next pull doesn't undo this push.
+      if(!plState.dailySyncedFrom) plState.dailySyncedFrom = {checks:{}, review:{}};
+      ['morning','afternoon','evening'].forEach(part=>{
+        const seen = plState.dailySyncedFrom.checks[part] || (plState.dailySyncedFrom.checks[part] = {});
+        (plState.checks[part]||[]).forEach(i=> seen[String(i.t||'').trim().toLowerCase()] = i.d);
+      });
+      ['highlight','notes'].forEach(f=> plState.dailySyncedFrom.review[f] = String(plState.review[f]||'').trim());
+      ['enjoyed','notEnjoyed','challenges','changes'].forEach(f=>
+        plState.dailySyncedFrom.review[f] = (plState.review[f]||[]).map(x=>String(x||'').trim()));
+      if(!plState.prioritiesSyncedFrom) plState.prioritiesSyncedFrom = {};
+      Object.keys(plState.priorities).forEach(k=> plState.prioritiesSyncedFrom[k] = String(plState.priorities[k]||'').trim());
+      plScheduleSave();
+      plNotionSyncStatus('ok', (d.changed||[]).length ? 'Saved to Notion' : 'Synced');
+    }catch(_){ plNotionSyncStatus('err','Offline'); }
+  }, 1200);
+}
+
 async function plSyncNotionDaily(){
   try{
     const res = await fetch('https://planner.romeobravos.net/api/daily', {cache:'no-store'});
@@ -3021,7 +3068,7 @@ function plRenderReview(){
       const n = document.createElement("span"); n.className="n"; n.textContent=(i+1)+".";
       const inp = document.createElement("input");
       inp.type = "text"; inp.value = val;
-      inp.oninput = ()=>{ plState.review[field][i] = inp.value; plScheduleSave(); };
+      inp.oninput = ()=>{ plState.review[field][i] = inp.value; plScheduleSave(); plPushNotion(); };
       row.append(n, inp); wrap.append(row);
     });
   });
@@ -3071,10 +3118,10 @@ document.getElementById("pl-focus").addEventListener("input", e=>{
   plState.focus = e.target.value; plScheduleSave();
 });
 document.getElementById("pl-highlight").addEventListener("input", e=>{
-  plState.review.highlight = e.target.value; plScheduleSave();
+  plState.review.highlight = e.target.value; plScheduleSave(); plPushNotion();
 });
 document.getElementById("pl-notes").addEventListener("input", e=>{
-  plState.review.notes = e.target.value; plScheduleSave();
+  plState.review.notes = e.target.value; plScheduleSave(); plPushNotion();
 });
 document.getElementById("pl-prev").onclick = ()=>plShiftDay(-1);
 document.getElementById("pl-next").onclick = ()=>plShiftDay(1);
@@ -3323,6 +3370,30 @@ let impDates = lImpDates();
 
 function idIcon(kind){ return kind==='birthday' ? '\ud83c\udf82' : kind==='time' ? '\u23f0' : '\ud83d\udccc'; }
 
+/**
+ * Send a hub-added important date to Notion. Needs the write key; without it the
+ * date stays on this device.
+ *
+ * Only entries the Important Dates database can actually represent are sent:
+ * a 'time' entry is a daily alarm and has no Type there, so the server reports
+ * it back as skipped rather than filing it under a wrong type.
+ */
+async function pushImportantDate(d){
+  if(!d || !wkGet()) return;
+  if(d.kind === 'time') return; // daily alarm \u2014 no Notion equivalent, stays local
+  try{
+    const res = await fetch('https://planner.romeobravos.net/api/important-dates', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+wkGet()},
+      body: JSON.stringify({dates:[{name:d.name, date:d.date, kind:d.kind}]})
+    });
+    if(res.status === 401){ showToast('\ud83d\udd11 Write key rejected'); return; }
+    if(!res.ok){ showToast('\u26a0\ufe0f Saved on device only'); return; }
+    const j = await res.json();
+    if((j.created||[]).length) showToast('\u2705 Added to Notion');
+  }catch(_){ showToast('\u26a0\ufe0f Offline \u2014 saved on device only'); }
+}
+
 function idNextOccurrence(entry, now){
   if(entry.kind === 'time'){
     const [hh,mm] = entry.time.split(':').map(Number);
@@ -3436,14 +3507,16 @@ function idToggleForm(where){
     if(!name){ if(typeof showToast==='function') showToast('Add a name first'); return; }
     if(kind==='time' && !timeInp.value){ if(typeof showToast==='function') showToast('Pick a time'); return; }
     if(kind!=='time' && !dateInp.value){ if(typeof showToast==='function') showToast('Pick a date'); return; }
-    impDates.push({
+    const newDate = {
       id: 'id'+Date.now()+Math.random().toString(36).slice(2,7),
       name, kind,
       date: kind!=='time' ? dateInp.value : '',
       time: kind==='time' ? timeInp.value : '',
       recurring: kind==='birthday'
-    });
+    };
+    impDates.push(newDate);
     sImpDates();
+    pushImportantDate(newDate);
     form.classList.remove('open'); form.style.display='none'; form.innerHTML='';
     renderImportantDates();
     if(typeof showToast==='function') showToast('\ud83c\udf82 Added');

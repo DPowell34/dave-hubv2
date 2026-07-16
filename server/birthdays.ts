@@ -152,6 +152,77 @@ function notionClient() {
   return getNotionClient() as any;
 }
 
+/* ═══════════════ IMPORTANT DATES WRITE ═══════════════
+   Dates added in the hub ("+ Add important date") were device-only. Same
+   HUB_WRITE_KEY gate as the other write paths. */
+
+function writeKeyOk(req: any): boolean {
+  const expected = process.env.HUB_WRITE_KEY || "";
+  if (!expected) return false;
+  const got = String(req.headers["authorization"] || "").replace(/^Bearer\s+/i, "");
+  if (!got || got.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= got.charCodeAt(i) ^ expected.charCodeAt(i);
+  return diff === 0;
+}
+
+function corsWrite(res: any) {
+  res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
+  res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Cache-Control", "no-store");
+}
+
+birthdaysRouter.options("/api/important-dates", (_req, res) => {
+  corsWrite(res);
+  res.setHeader("Access-Control-Max-Age", "600");
+  res.sendStatus(204);
+});
+
+// The hub's kinds map onto the database's Type options; "time" (a daily alarm)
+// has no equivalent and is reported rather than filed under a wrong type.
+const KIND_TO_TYPE: Record<string, string> = {
+  birthday: "🎂 Birthday",
+  date: "📌 Appointment",
+};
+
+birthdaysRouter.post("/api/important-dates", async (req, res) => {
+  corsWrite(res);
+  if (!writeKeyOk(req)) { res.status(401).json({ error: "unauthorized" }); return; }
+
+  const incoming = Array.isArray(req.body?.dates) ? req.body.dates.slice(0, 50) : [];
+  if (!incoming.length) { res.json({ ok: true, created: [], skipped: [] }); return; }
+
+  try {
+    const notion = notionClient();
+    const already = await existingBirthdays(notion); // normalised names already present
+    const created: string[] = [], skipped: string[] = [];
+
+    for (const d of incoming) {
+      const name = String(d.name || "").trim();
+      const date = String(d.date || "").slice(0, 10);
+      if (!name) { skipped.push("(untitled)"); continue; }
+      if (d.kind === "time" || !date) { skipped.push(`${name}: daily-time entries have no Type in Notion`); continue; }
+      if (already.has(norm(name))) { skipped.push(`${name}: already in Notion`); continue; }
+
+      await notion.pages.create({
+        parent: { database_id: IMPORTANT_DATES_DB },
+        properties: {
+          Event: { title: [{ text: { content: name.slice(0, 200) } }] },
+          Date: { date: { start: date } },
+          Type: { select: { name: KIND_TO_TYPE[d.kind] || "📌 Appointment" } },
+          Notes: { rich_text: [{ text: { content: "Added from Dave's Hub" } }] },
+        },
+      });
+      already.add(norm(name));
+      created.push(`${name} — ${date}`);
+    }
+    res.json({ ok: true, created, skipped });
+  } catch (err: any) {
+    res.status(502).json({ error: "important_dates_write_failed", detail: String(err?.message || err).slice(0, 300) });
+  }
+});
+
 /**
  * Birthdays move once a year at most — a daily pass is plenty, and it keeps this
  * off the shared Notion/Google request budget the 5-minute syncs already use.
