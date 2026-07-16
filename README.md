@@ -62,23 +62,42 @@ visible, and re-syncs on wake if the data is older than 5 minutes.
 |---|---|---|
 | `GET /api/today-events?date=` | **live** | Today's Agenda, event stat tiles — same source as the Planner Calendar, so the two always agree |
 | `GET /api/today-schedule` | **live** | Planner hourly schedule (pre-existing) |
-| `GET /api/command-center` | **not mounted** | Priorities, Important Dates, revenue counts |
+| `GET /api/command-center` | **live** | Priorities, Important Dates, revenue counts |
 
-`/api/command-center` is written but not mounted — see below. Until it is, the Priorities
-and Revenue cards stay hidden, the Important Dates tile reads 0, and the rest of the screen
-works normally. Nothing errors.
+## The `/api/command-center` endpoint
 
-## Deploying `/api/command-center`
+`server/command-center.ts` is the source of record; it deploys to
+`/opt/master-planner-sync/src/routes/command-center.ts` and is mounted from that service's
+`src/index.ts`. It returns `{ importantDates, priorities, revenue }`.
 
-`server/command-center.js` is a drop-in Express router. In the `master-planner-sync` service:
+That service is **TypeScript** — edit `src/`, build, then restart:
 
-```js
-const commandCenter = require('./command-center');
-app.use(commandCenter({ notion, cache: 60 }));   // reuse the existing Notion client
+```bash
+cd /opt/master-planner-sync
+export NODE_OPTIONS=--max-old-space-size=1600   # tsc OOMs on this t3.small without it
+./node_modules/.bin/tsc -p tsconfig.json        # build BEFORE restarting
+systemctl restart master-planner-sync
 ```
 
-It returns `{ importantDates, priorities, revenue }`. Responses are cached 60s server-side,
-and a Notion outage serves stale rather than failing.
+Build before restarting, always: if the build fails the running service is untouched.
+
+### Things that will bite you
+
+- **Use `databases.query({database_id})`, not `dataSources.query`.** `src/notion/client.ts`
+  calls `(notion as any).dataSources.query`, but `@notionhq/client` is pinned `^2.2.15`
+  where `client.dataSources` is undefined (it's a v5+ API) — the cast hides it and it throws
+  at runtime. Those are *database* ids, not the `collection://` data-source ids Notion's MCP
+  returns.
+- **Notion's ~3 req/sec limit is shared across the service.** Fanning out here while the hub
+  also hits `today-schedule` timed out both and 500'd the pre-existing endpoint. Calls are
+  sequential, cached 5 min to match the hub's poll, with concurrent misses collapsed onto one
+  refresh. Keep it that way.
+- **Revenue needs a Notion share.** The OAuth integration ("Master Planner") is shared with
+  the Master Planner page tree only, so the DPowellTC Revenue databases return
+  `object_not_found`. Share **DPowellTC — Revenue Command Center** with that integration to
+  light them up; the endpoint backs off for an hour between attempts and reports `null` until
+  then, so the hub hides the card. An unreadable database is never reported as `0` — that
+  reads as "no leads" when it means "no access".
 
 ### Privacy constraint — read before extending
 
@@ -89,7 +108,20 @@ Lead Pipeline and Client Accounts carry `Email`, `Mobile`, and `Consent Record`
 lead's name or contact details. Both databases are empty today, so nothing is exposed; the
 constraint exists so that stays true once the GHL → Make relay starts landing rows.
 
-Do not add per-lead fields to that endpoint unless the site is put behind auth first.
+Do not add per-lead fields to that endpoint unless the site is put behind auth first. This
+matters more once the Revenue page is shared with the integration — that share is what turns
+those counts on.
+
+## Known stale — not wired to anything
+
+These Command Center cards are still hardcoded. They are Gmail/Drive data and no endpoint
+exists for them, so they were left rather than faked:
+
+- **Inbox Triage** — five fixed emails, "40 unread" is a literal
+- **Recent Files** — seven fixed filenames with invented dates
+- **Tasks & Projects** — eight fixed Notion hubs with invented "updated" dates
+
+They need Gmail/Drive endpoints on the Express service before they can tell the truth.
 
 ## Known stale — not wired to anything
 
