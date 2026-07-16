@@ -346,3 +346,28 @@ scheduleMergeRouter.get("/api/schedule-merge", async (req, res) => {
     res.status(502).json({ error: "merge_failed", detail: String(err?.message || err).slice(0, 300) });
   }
 });
+
+/**
+ * Keep both sides converged without anyone opening the app.
+ *
+ * 15 minutes, not 5: a merge costs a Master Planner block walk plus a Google
+ * list, and it shares Notion's ~3 req/sec budget with /api/today-schedule and
+ * /api/command-center — fanning those out concurrently is what timed out
+ * today-schedule earlier. Once converged each pass is a no-op diff, so a
+ * shorter interval buys nothing.
+ *
+ * Self-calls over loopback rather than refactoring the handler, matching how
+ * this module already reads today-schedule.
+ */
+const AUTO_MERGE_MS = 15 * 60_000;
+setTimeout(() => {
+  setInterval(() => {
+    fetch(`http://127.0.0.1:${config.port}/api/schedule-merge?apply=1`)
+      .then((r) => r.json())
+      .then((r: any) => {
+        const n = (r?.createdInGoogle?.length || 0) + (r?.writtenIntoNotion?.length || 0);
+        if (n) console.log(`schedule-merge: converged ${n} item(s)`);
+      })
+      .catch((e) => console.log("schedule-merge auto run failed:", String(e?.message || e)));
+  }, AUTO_MERGE_MS);
+}, 60_000); // let the service finish starting before the first pass

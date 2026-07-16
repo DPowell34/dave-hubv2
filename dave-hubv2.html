@@ -1257,15 +1257,6 @@ html,body{
     </div>
 
     <div class="pl-card">
-      <h3>📆 Calendar</h3>
-      <div class="pl-sub" style="display:flex;align-items:center;justify-content:space-between">
-        <span id="pl-cal-count">—</span>
-        <span class="pl-cal-sync" id="pl-cal-sync-badge"><span style="width:7px;height:7px;border-radius:50%;background:#9CA3AF;display:inline-block"></span> Google · —</span>
-      </div>
-      <div id="pl-cal-list"></div>
-    </div>
-
-    <div class="pl-card">
       <h3>🎂 Important Dates &amp; Birthdays</h3>
       <div class="pl-sub" id="id-count-pl">Never miss what matters. Updates automatically.</div>
       <div id="id-list-pl"></div>
@@ -1279,12 +1270,19 @@ html,body{
       <div class="pl-prio-list" id="pl-priorities"></div>
     </div>
 
+    <!-- Calendar + Today's Schedule are one card: the server merges Notion and
+         Google both ways, so two separate cards could only ever disagree. -->
     <div class="pl-card">
       <h3>🗓️ Today's Schedule</h3>
       <div class="pl-sub" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
-        <span>6 AM – 9 PM. Your recurring blocks are pre-filled.</span>
-        <span class="pl-cal-sync" id="pl-sched-sync"><span style="width:7px;height:7px;border-radius:50%;background:#9CA3AF;display:inline-block"></span> Notion · —</span>
+        <span id="pl-cal-count">—</span>
+        <span style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="pl-cal-sync" id="pl-cal-sync-badge"><span style="width:7px;height:7px;border-radius:50%;background:#9CA3AF;display:inline-block"></span> Google · —</span>
+          <span class="pl-cal-sync" id="pl-sched-sync"><span style="width:7px;height:7px;border-radius:50%;background:#9CA3AF;display:inline-block"></span> Notion · —</span>
+        </span>
       </div>
+      <div id="pl-cal-list"></div>
+      <div class="pl-sub" style="margin-top:14px">By hour · editable · your edits are kept</div>
       <div class="pl-legs" id="pl-legs"></div>
     </div>
 
@@ -2815,8 +2813,17 @@ document.getElementById("pl-datepick").onchange = e=>plLoad(e.target.value);
 document.getElementById("pl-datepick").value = plTodayISO();
 refreshTodayCard();
 setInterval(()=>{ if(curScreen==='planner') plRenderSchedule(); }, 60000);
-setInterval(()=>{ if(curScreen==='planner') plSyncNotionSchedule(); }, 60*60*1000);
-setInterval(()=>{ if(curScreen==='planner') plRenderCalendar(); }, 60*60*1000);
+// 5 minutes, matching the Command Center — hourly was too stale to call "current".
+// Kept sequential and screen-gated: two staggered calls are fine, but fanning out
+// concurrently against Notion's ~3 req/sec budget is what timed out today-schedule.
+const PL_SYNC_MS = 5*60*1000;
+setInterval(()=>{ if(curScreen==='planner' && !document.hidden) plSyncNotionSchedule(); }, PL_SYNC_MS);
+setInterval(()=>{ if(curScreen==='planner' && !document.hidden) plRenderCalendar(); }, PL_SYNC_MS);
+// A phone that slept should not show stale hours on wake.
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden || curScreen!=='planner') return;
+  plSyncNotionSchedule(); plRenderCalendar();
+});
 
 // ══════════ DAILY MOTIVATION QUOTES ══════════
 // Short, widely-attributed aphorisms from Black women and men — activists,
