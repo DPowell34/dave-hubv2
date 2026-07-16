@@ -66,19 +66,27 @@ visible, and re-syncs on wake if the data is older than 5 minutes.
 | `GET /api/schedule-merge` | **live** | Two-way Notion ↔ Google merge; `?apply=1` writes, self-runs every 15 min |
 | `GET /api/sync-birthdays` | **live** | Google contact birthdays → Important Dates; `?apply=1` writes, daily |
 | `GET /api/daily` | **live** | Today's checklists + End of Day Review (read-only) |
-| `GET /api/categories` | **live** | The seven Browse category databases (read-only) |
+| `GET /api/categories` | **live** | The seven Browse category databases |
+| `POST /api/categories` | **live** | Upserts entries from the app; requires `HUB_WRITE_KEY` |
 
-## Why nothing writes *from* the page
+## What may write, and why
 
-Every write in this system is **server-initiated** (a timer inside the box) or a manual
-`?apply=1`. Nothing accepts data *from* the page, and that is deliberate:
-**romeobravos.net has no auth, and CORS restrains browsers, not `curl`.** A public write
-endpoint would let anyone tick Dave's checklist or write into his Master Planner.
+**romeobravos.net has no auth, and CORS restrains browsers, not `curl`** — so an
+unauthenticated write endpoint would let anyone write into Dave's workspace. Everything here
+follows from that:
 
-That's why `/api/daily` and `/api/categories` are read-only and Notion is the source of
-truth for checklists, the review, and Browse entries: all of that state lives in
-`localStorage` on the phone, so genuine two-way would require the page to push. Revisit if
-the site ever gets authentication — that same change would also unlock the Revenue counts.
+- **Reads** (`today-schedule`, `today-events`, `command-center`, `daily`, `categories`) are
+  public and safe.
+- **Server-initiated writes** (`schedule-merge`, `sync-birthdays`) run on timers inside the
+  box. Nothing external can trigger data injection; the worst a stranger can do by hitting
+  `?apply=1` is make an idempotent, additive merge run early.
+- **Writes from the page** (`POST /api/categories`) require `HUB_WRITE_KEY` — see the
+  bottom of this file. The key is user-supplied, per device, and never in the page.
+
+Still read-only: **`/api/daily`** (checklists + End of Day Review). Notion is the source of
+truth there — tick in Notion, not the app. The same key mechanism could extend it if wanted.
+
+The **Revenue counts** remain gated on the separate Notion share, not on this.
 
 ### Browse entry matching
 
