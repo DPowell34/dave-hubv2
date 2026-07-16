@@ -1813,7 +1813,7 @@ function goScreen(s,btn){
   if(btn) btn.classList.add('active');
   else if(niMap[s]) document.getElementById(niMap[s])&&document.getElementById(niMap[s]).classList.add('active');
   if(s==='home'){renderHome();document.getElementById('ni-home').classList.add('active');}
-  if(s==='browse') renderBrowse();
+  if(s==='browse'){ renderBrowse(); syncNotionCategories(); }
   if(s==='search'){renderTypeChips();doSearch();}
   if(s==='settings') renderSettings();
   if(s==='planner') renderPlanner();
@@ -2186,6 +2186,61 @@ function filterMust(){
   globalTypeF='must';
   renderTypeChips();doSearch();
 }
+
+/* ═══════ BROWSE CATEGORIES — NOTION SYNC ═══════
+   Notion -> app only, same reason as the checklists: pushing back would need a
+   public write endpoint and romeobravos.net has no auth. Rows added in Notion
+   appear here; "+ Add Entry" in the app stays local.
+
+   Matching is type + lowercase title, which is what the app's own duplicate
+   check already uses. That matters on the very first sync: the seven Notion
+   databases were seeded from these same 15 SEED places, so keying any other way
+   would show every default twice. */
+const CAT_SYNC_MS = 5*60*1000;
+let _catSyncing = false;
+
+function catKey(e){ return String(e.type||'')+'|'+String(e.title||'').trim().toLowerCase(); }
+
+async function syncNotionCategories(){
+  if(_catSyncing) return;
+  _catSyncing = true;
+  try{
+    const res = await fetch('https://planner.romeobravos.net/api/categories', {cache:'no-store'});
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!data || !data.found || !Array.isArray(data.entries) || !data.entries.length) return;
+
+    const byKey = new Map(entries.map(e=>[catKey(e), e]));
+    let added = 0, updated = 0;
+
+    data.entries.forEach(r=>{
+      const local = byKey.get(catKey(r));
+      if(!local){
+        entries.push({...r, id: Date.now()+Math.floor(Math.random()*10000),
+                      addedDate: r.addedDate || new Date().toISOString().split('T')[0]});
+        added++;
+        return;
+      }
+      // Adopt the Notion row's identity, then follow it only where this device
+      // hasn't diverged — same rule as the schedule/priorities syncs.
+      local.notionId = r.notionId;
+      const last = local.notionSyncedFrom || {};
+      ['status','priority','category','favorite','rating','notes'].forEach(f=>{
+        const cur = local[f], next = r[f];
+        if(next === undefined || next === '' ) return;
+        const unchanged = last[f] === undefined || String(cur) === String(last[f]);
+        if(unchanged && String(cur) !== String(next)){ local[f] = next; updated++; }
+        last[f] = next;
+      });
+      local.notionSyncedFrom = last;
+    });
+
+    // Never delete: a row missing from Notion may simply be app-only.
+    if(added || updated){ sEntries(); if(typeof refreshView==='function') refreshView(); }
+  }catch(_){ /* offline — Browse keeps working on local data */ }
+  finally{ _catSyncing = false; }
+}
+setInterval(()=>{ if(!document.hidden && (curScreen==='browse'||curScreen==='cat'||curScreen==='home')) syncNotionCategories(); }, CAT_SYNC_MS);
 
 function refreshView(){
   if(curScreen==='home') renderHome();
