@@ -7,22 +7,46 @@ and no external requests.
 
 ## How this repo relates to the live site
 
-**This repo is a source mirror. Pushing here does not deploy.**
+**This repo is a source mirror. Pushing here does not deploy** — deployment is the separate
+step below.
 
 | | |
 |---|---|
-| `romeobravos.net` | nginx on EC2 (`54.88.80.208`) — serves this file as `index.html` |
+| `romeobravos.net` | nginx on EC2 — doc root `/var/www/romeobravo`, serves this file as `index.html` |
 | `planner.romeobravos.net` | Express service `master-planner-sync`, same box — holds the Notion + Google tokens |
-| this repo | source of truth for the HTML; deployed to the box manually |
+| this repo | source of truth for the HTML |
 
-Two consequences worth knowing before you touch anything:
+Two things to know before you touch anything:
 
 - The file is committed as **`dave-hubv2.html`** but nginx serves the doc root's
-  **`index.html`**. Deploy by copying it into place under that name — renaming it on the
-  server will take the site down.
-- Before editing, check the live file is not ahead of this repo. It has been before:
-  as of 2026-07-16 the repo was 575 lines behind live and was missing the entire Command
-  Center screen. `curl -s https://romeobravos.net > live.html && diff live.html dave-hubv2.html`
+  **`index.html`**. Deploy it under that name — renaming it on the server takes the site down.
+- Check the live file is not ahead of this repo before editing. It has been before: as of
+  2026-07-16 the repo was 575 lines behind live and was missing the entire Command Center
+  screen. `curl -s https://romeobravos.net > live.html && diff live.html dave-hubv2.html`
+
+## Deploying
+
+The box is reachable via **AWS SSM** (no SSH needed): instance `i-0c750f471912bb58e`
+in **us-east-1**. Push to `main` first, then run, backing up and gating on the checksum:
+
+```bash
+SHA=$(git show HEAD:dave-hubv2.html | sha256sum | awk '{print $1}')
+aws ssm send-command --region us-east-1 --instance-ids i-0c750f471912bb58e \
+  --document-name AWS-RunShellScript --parameters "{\"commands\":[
+    \"set -euo pipefail\", \"cd /var/www/romeobravo\",
+    \"cp -p index.html index.html.bak-\$(date +%Y%m%d-%H%M%S)\",
+    \"curl -fsSL https://raw.githubusercontent.com/DPowell34/dave-hubv2/main/dave-hubv2.html -o /tmp/new.html\",
+    \"[ \\\"\$(sha256sum /tmp/new.html | awk '{print \\\$1}')\\\" = \\\"$SHA\\\" ] || { echo MISMATCH; exit 1; }\",
+    \"install -o www-data -g www-data -m 644 /tmp/new.html index.html\"]}"
+```
+
+Then verify what the public URL actually serves:
+`curl -s https://romeobravos.net | sha256sum` — it must equal `$SHA`.
+
+Backups accumulate in the doc root as `index.html.bak-YYYYMMDD-HHMMSS`; roll back by copying
+one over `index.html`. Note `/var/www/html` is a **different site** (DPowellTC) — don't
+deploy here. `nginx -t` emits a pre-existing `conflicting server name "dpowelltc.com"`
+warning; it is unrelated.
 
 ## Data flow
 
@@ -36,12 +60,13 @@ visible, and re-syncs on wake if the data is older than 5 minutes.
 
 | Endpoint | Status | Feeds |
 |---|---|---|
-| `GET /api/today-events?date=` | **live** | Today's Agenda, event stat tiles |
+| `GET /api/today-events?date=` | **live** | Today's Agenda, event stat tiles — same source as the Planner Calendar, so the two always agree |
 | `GET /api/today-schedule` | **live** | Planner hourly schedule (pre-existing) |
-| `GET /api/command-center` | **not deployed yet** | Priorities, Important Dates, revenue counts |
+| `GET /api/command-center` | **not mounted** | Priorities, Important Dates, revenue counts |
 
-`/api/command-center` is written but not mounted — see below. Until it is, the cards it
-feeds stay hidden and the rest of the screen works normally. Nothing errors.
+`/api/command-center` is written but not mounted — see below. Until it is, the Priorities
+and Revenue cards stay hidden, the Important Dates tile reads 0, and the rest of the screen
+works normally. Nothing errors.
 
 ## Deploying `/api/command-center`
 
