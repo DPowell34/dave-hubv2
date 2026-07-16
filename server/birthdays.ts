@@ -90,12 +90,20 @@ birthdaysRouter.get("/api/sync-birthdays", async (req, res) => {
       pageToken = r.data.nextPageToken || undefined;
     } while (pageToken);
 
-    // One entry per person: keep the soonest upcoming occurrence.
+    // Google's contacts calendar carries anniversaries and other custom dates
+    // alongside birthdays (e.g. "Kim Hall's anniversary"). Only birthdays are
+    // synced: filing an anniversary under 🎂 Birthday would put a false label on
+    // a real date, and Important Dates has no Anniversary type to file it under.
     const byPerson = new Map<string, { name: string; date: string }>();
+    const notBirthdays: string[] = [];
     for (const ev of events) {
       const name = (ev.summary || "").trim();
       const date = ev.start?.date || (ev.start?.dateTime || "").slice(0, 10);
       if (!name || !date) continue;
+      if (!/\bbirthday\b/i.test(name)) {
+        if (!notBirthdays.includes(name)) notBirthdays.push(`${name} — ${date}`);
+        continue;
+      }
       const k = norm(name);
       if (!k) continue;
       const prev = byPerson.get(k);
@@ -110,6 +118,7 @@ birthdaysRouter.get("/api/sync-birthdays", async (req, res) => {
       googleBirthdays: byPerson.size,
       alreadyInNotion: byPerson.size - missing.length,
       willAdd: missing.map((m) => `${m.name} — ${m.date}`),
+      skippedNotBirthdays: notBirthdays, // anniversaries etc. — add by hand if wanted
     };
 
     if (!apply) {
