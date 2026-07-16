@@ -64,6 +64,20 @@ visible, and re-syncs on wake if the data is older than 5 minutes.
 | `GET /api/today-schedule` | **live** | Planner hourly grid (pre-existing) |
 | `GET /api/command-center` | **live** | Priorities, Important Dates, revenue counts |
 | `GET /api/schedule-merge` | **live** | Two-way Notion ↔ Google merge; `?apply=1` writes, self-runs every 15 min |
+| `GET /api/sync-birthdays` | **live** | Google contact birthdays → Important Dates; `?apply=1` writes, daily |
+| `GET /api/daily` | **live** | Today's checklists + End of Day Review (read-only) |
+
+## Why nothing writes *from* the page
+
+Every write in this system is **server-initiated** (a timer inside the box) or a manual
+`?apply=1`. Nothing accepts data *from* the page, and that is deliberate:
+**romeobravos.net has no auth, and CORS restrains browsers, not `curl`.** A public write
+endpoint would let anyone tick Dave's checklist or write into his Master Planner.
+
+That's why `/api/daily` is read-only and Notion is the source of truth for checklists and
+the review: the hub's checkbox state lives in `localStorage` on the phone, so genuine
+two-way would require the page to push. Revisit if the site ever gets authentication —
+that same change would also unlock the Revenue counts.
 
 ## The schedule merge
 
