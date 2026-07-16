@@ -143,8 +143,12 @@ async function getPriorities(): Promise<any[]> {
   );
   if (start === -1) return [];
 
+  // Only the first column_list under today's heading holds Work/Learn/Play, so
+  // stop at the first one that yields anything rather than walking the whole
+  // day's subtree — every extra column is another API request against a ~3/sec
+  // budget shared with /api/today-schedule.
   const prios: any[] = [];
-  for (let i = start + 1; i < blocks.length; i++) {
+  for (let i = start + 1; i < blocks.length && !prios.length; i++) {
     const b = blocks[i];
     if (b.type === "heading_1") break; // next day's section — stop
     if (b.type !== "column_list" || !b.has_children) continue;
@@ -158,7 +162,6 @@ async function getPriorities(): Promise<any[]> {
         if (m) prios.push({ kind: m[1], text: m[2].replace(/\s+/g, " ").trim() });
       }
     }
-    if (prios.length) break;
   }
   return prios;
 }
@@ -204,8 +207,39 @@ async function getRevenue(): Promise<any> {
   return { contentQueue: content === null ? null : content.length, byStatus, rows };
 }
 
-const CACHE_MS = 60_000;
+/**
+ * Notion allows ~3 requests/sec per integration, and the hub asks this endpoint
+ * and /api/today-schedule for the same page at the same time. Fanning out with
+ * Promise.all here timed BOTH out (notionhq_client_request_timeout) and took
+ * today-schedule down with it. So: match the hub's 5-minute poll so a warm cache
+ * serves almost every request, and run the calls in sequence rather than at once.
+ */
+const CACHE_MS = 5 * 60_000;
 let cache: { at: number; body: any } = { at: 0, body: null };
+
+/**
+ * Revenue lives outside the integration's share scope, so every attempt costs
+ * four requests to learn nothing. Back off for an hour after a miss instead of
+ * paying that on each refresh; it lights up on its own once the DPowellTC page
+ * is shared with the "Master Planner" integration.
+ */
+const REVENUE_RETRY_MS = 60 * 60_000;
+let revenueRetryAt = 0;
+
+let inFlight: Promise<any> | null = null;
+
+async function build(): Promise<any> {
+  const importantDates = await getImportantDates().catch(() => [] as any[]);
+  const priorities = await getPriorities().catch(() => [] as any[]);
+
+  let revenue: any = null;
+  if (Date.now() >= revenueRetryAt) {
+    revenue = await getRevenue().catch(() => null);
+    if (revenue === null) revenueRetryAt = Date.now() + REVENUE_RETRY_MS;
+  }
+
+  return { found: true, syncedAt: new Date().toISOString(), importantDates, priorities, revenue };
+}
 
 commandCenterRouter.get("/api/command-center", async (_req, res) => {
   res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
@@ -217,15 +251,19 @@ commandCenterRouter.get("/api/command-center", async (_req, res) => {
   }
 
   try {
-    // One slow or failing database must not take the whole payload down.
-    const [importantDates, priorities, revenue] = await Promise.all([
-      getImportantDates().catch(() => [] as any[]),
-      getPriorities().catch(() => [] as any[]),
-      getRevenue().catch(() => null),
-    ]);
+    // Collapse concurrent misses onto one refresh — two phones opening the
+    // screen together must not double the Notion traffic.
+    if (!inFlight) {
+      inFlight = build().finally(() => {
+        inFlight = null;
+      });
+    }
+    const body = await inFlight;
 
-    const body = { found: true, syncedAt: new Date().toISOString(), importantDates, priorities, revenue };
-    cache = { at: Date.now(), body };
+    // Don't cache a wholly empty result; let the next poll retry sooner.
+    if (body.importantDates.length || body.priorities.length || body.revenue) {
+      cache = { at: Date.now(), body };
+    }
     res.json(body);
   } catch (err) {
     // Serve stale over erroring — the hub shows "showing last known".
