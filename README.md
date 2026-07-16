@@ -60,9 +60,29 @@ visible, and re-syncs on wake if the data is older than 5 minutes.
 
 | Endpoint | Status | Feeds |
 |---|---|---|
-| `GET /api/today-events?date=` | **live** | Today's Agenda, event stat tiles — same source as the Planner Calendar, so the two always agree |
-| `GET /api/today-schedule` | **live** | Planner hourly schedule (pre-existing) |
+| `GET /api/today-events?date=` | **live** | Today's Agenda, event stat tiles — same source as the Planner's event list |
+| `GET /api/today-schedule` | **live** | Planner hourly grid (pre-existing) |
 | `GET /api/command-center` | **live** | Priorities, Important Dates, revenue counts |
+| `GET /api/schedule-merge` | **live** | Two-way Notion ↔ Google merge; `?apply=1` writes, self-runs every 15 min |
+
+## The schedule merge
+
+`server/schedule-merge.ts` → `src/routes/schedule-merge.ts`. Notion's "Today's Schedule"
+table and Google Calendar each held items the other lacked, and nothing reconciled them.
+This diffs both and, with `?apply=1`, creates Google events for Notion-only rows and writes
+Google-only events into the table. `?apply=0` is a dry run — use it before any manual apply.
+
+- **Idempotency is on the Google side**, via `extendedProperties.private.daveHubSchedule`
+  (normalised title + start minute). Not `sync_state`: table rows are free text with no page
+  id, and `syncCalendarToTask()` looks up by `google_event_id`, so a synthetic key there
+  would be mistaken for a Task page.
+- **Additive only. Never deletes.** Deleting from a real calendar off a heuristic text match
+  isn't worth the risk. All-day events and anything outside the table's rows (Bed Time at
+  8:30 PM) are reported as skipped, not force-fitted.
+- **Write to today's table, never the template.** The page has TWO "Today's Schedule"
+  tables and the blank template inside the Daily Planner toggle comes *first*. Find today's
+  `heading_1` and search only after it — see `findTodayScheduleTable`. Searching from the
+  top writes today's one-offs into the blank Dave copies for every new day. This happened.
 
 ## The `/api/command-center` endpoint
 
