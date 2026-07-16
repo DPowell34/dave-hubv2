@@ -177,3 +177,26 @@ They need Gmail/Drive endpoints on the Express service before they can tell the 
 No build, no dependencies. It needs to be served over `http://` (not `file://`), and the
 Notion API will be CORS-blocked locally — the Command Center will show
 "Offline — showing last known", which is the correct degraded state.
+
+## Writing from the app (`HUB_WRITE_KEY`)
+
+Reads are public. **Writes require `HUB_WRITE_KEY`**, set in
+`/opt/master-planner-sync/.env` and sent by the hub as `Authorization: Bearer …`. The key is
+pasted into **Settings → Notion Write Key** and lives in that device's localStorage only —
+**never in the page source**. That's the whole point: the page is public, so a baked-in
+secret would protect nothing, whereas a key the user supplies is a real credential.
+
+Invariants worth not breaking:
+
+- **An unset key disables writes**, it does not open them. An empty env var must never mean
+  "allow everyone".
+- The comparison is **timing-safe**.
+- The **`OPTIONS` handler is required**: a cross-origin POST carrying `Authorization` is
+  preflighted, and without it the browser never sends the real request.
+- Pushes fire **only from user actions**, never from `syncNotionCategories` — otherwise a
+  pull immediately echoes back as a push.
+
+`POST /api/categories` upserts by `notionId`, else case-insensitive title within the
+category. **Settings → Push Pending to Notion** sends anything added before the key was set.
+
+Rotate by editing `.env` and restarting the service; each device then re-pastes the key.
