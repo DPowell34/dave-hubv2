@@ -22,25 +22,21 @@
 html,body{
   height:100%;font-family:var(--f);color:var(--text);
   overflow:hidden;-webkit-font-smoothing:antialiased;
-  background:
-    radial-gradient(900px 500px at 90% -10%,  #BFDCF5 0%, rgba(191,220,245,0) 60%),
-    radial-gradient(800px 700px at -10% 100%, #FFD9BF 0%, rgba(255,217,191,0) 60%),
-    radial-gradient(600px 400px at 50% 50%,   #EAF3FC 0%, rgba(234,243,252,0) 70%),
-    var(--bg);
+  background:#000;
 }
 
 /* ── HEADER ── */
 .hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:200;
-  background:var(--surface);border-bottom:1px solid var(--border);
+  background:#000;border-bottom:1px solid rgba(255,255,255,.09);
   display:flex;align-items:center;justify-content:space-between;padding:0 16px;
   backdrop-filter:blur(20px)}
 .hdr-l{display:flex;align-items:center;gap:9px}
 .logo-mark{width:30px;height:30px;border-radius:8px;background:var(--grad);
   display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.app-name{font-size:16px;font-weight:800;letter-spacing:-.4px}
+.app-name{font-size:16px;font-weight:800;letter-spacing:-.4px;color:#fff}
 .hdr-r{display:flex;gap:6px}
-.ib{width:34px;height:34px;border-radius:9px;background:var(--surface2);border:none;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t2);
+.ib{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.09);border:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;color:#CFE0F2;
   transition:all .15s;font-size:15px}
 .ib:active{transform:scale(.92)}
 .back-row{display:flex;align-items:center;gap:6px}
@@ -48,10 +44,10 @@ html,body{
   color:var(--a1);font-size:13px;font-weight:700;cursor:pointer;padding:4px 0}
 .back-btn.show{display:flex}
 .back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round}
-.page-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.page-title{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px}
 
 /* ── MAIN ── */
-.main{position:fixed;top:var(--hdr);bottom:var(--nav);left:0;right:0;
+.main{position:fixed;top:var(--hdr);bottom:var(--nav);left:0;right:0;background:#000;
   overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .screen{display:none;min-height:100%}
 .screen.active{display:block}
@@ -59,7 +55,7 @@ html,body{
 
 /* ── NAV ── */
 .bnav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);
-  background:var(--surface);border-top:1px solid var(--border);
+  background:#000;border-top:1px solid rgba(255,255,255,.09);
   display:flex;align-items:center;z-index:200;
   padding-bottom:env(safe-area-inset-bottom,0)}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -67,7 +63,7 @@ html,body{
   font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:6px 2px}
 .ni svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;
   stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
-.ni.active{color:var(--a1)}
+.ni.active{color:#4DA3E8}
 .ni.active svg{transform:scale(1.15)}
 .ni-add{flex:0 0 60px}
 .ni-add-btn{width:50px;height:50px;border-radius:50%;background:var(--grad);
@@ -83,6 +79,87 @@ html,body{
   font-size:12px;font-weight:700;z-index:600;transition:all .22s;pointer-events:none;
   white-space:nowrap;box-shadow:var(--shx)}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ══════════ OFFICE COMMAND CENTER ══════════ */
+.cc-hero{background:var(--grad);border-radius:0 0 var(--rl) var(--rl);padding:22px 18px 20px;color:#fff;position:relative;overflow:hidden;margin-bottom:16px}
+.cc-eyebrow{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;opacity:.72}
+.cc-greet{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-top:3px}
+.cc-when{display:flex;align-items:baseline;gap:10px;margin-top:5px;font-size:13px;font-weight:600;opacity:.85}
+.cc-when b{font-size:15px;font-weight:800;opacity:1}
+.cc-src{margin-top:12px;font-size:10px;font-weight:600;opacity:.7;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cc-src span{display:inline-flex;align-items:center;gap:4px}
+.cc-live{width:6px;height:6px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 3px rgba(74,222,128,.25)}
+.cc-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:18px}
+.cc-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;box-shadow:var(--sh)}
+.cc-stat-n{font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1;color:var(--a1)}
+.cc-stat-l{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--t2);margin-top:6px}
+.cc-stat-s{font-size:11px;font-weight:600;color:var(--t3);margin-top:2px}
+.cc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin:0 16px 16px;box-shadow:var(--sh);overflow:hidden}
+.cc-card-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.cc-card-t{font-size:14px;font-weight:800;letter-spacing:-.2px;display:flex;align-items:center;gap:7px}
+.cc-card-c{font-size:11px;font-weight:700;color:var(--t3)}
+.cc-ag{display:flex;align-items:center;gap:12px;padding:9px 16px;border-top:1px solid var(--border)}
+.cc-ag-time{font-size:11px;font-weight:800;color:var(--t2);width:62px;flex-shrink:0}
+.cc-ag-title{font-size:13px;font-weight:600;color:var(--text)}
+.cc-ag.now{background:color-mix(in srgb,var(--a2) 8%,white)}
+.cc-ag.now .cc-ag-time{color:var(--a2)}
+.cc-ag.now .cc-ag-title{font-weight:800}
+.cc-nowpill{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;background:var(--a2);color:#fff;border-radius:20px;padding:2px 7px;margin-left:6px}
+.cc-ag.done .cc-ag-time,.cc-ag.done .cc-ag-title{opacity:.45}
+.cc-ag-empty{padding:14px 16px;border-top:1px solid var(--border);font-size:12px;font-weight:600;color:var(--t3)}
+/* priorities / agreements / vision — Notion-fed */
+.cc-prio{display:flex;gap:11px;padding:11px 16px;border-top:1px solid var(--border);align-items:flex-start}
+.cc-prio-ic{font-size:15px;flex-shrink:0;line-height:1.3}
+.cc-prio-b{flex:1;min-width:0}
+.cc-prio-k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--a2)}
+.cc-prio-v{font-size:12.5px;font-weight:600;color:var(--text);line-height:1.45;margin-top:2px}
+.cc-fa-wrap,.cc-vb-wrap{display:grid;grid-template-columns:1fr;gap:8px;padding:4px 16px 14px;border-top:1px solid var(--border);padding-top:12px}
+.cc-fa{display:flex;align-items:center;gap:9px;border-radius:var(--rs);padding:9px 11px;font-size:12.5px;font-weight:700;background:var(--surface2);color:var(--text)}
+.cc-fa:nth-child(even){background:color-mix(in srgb,#FF5910 9%,white)}
+.cc-fa em{font-style:normal;font-size:14px;flex-shrink:0}
+.cc-vb{border-radius:var(--rs);padding:10px 12px;background:var(--surface2)}
+.cc-vb:nth-child(even){background:color-mix(in srgb,#FF5910 9%,white)}
+.cc-vb-t{font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px;color:var(--text)}
+.cc-vb-l{font-size:11px;font-weight:600;color:var(--t2);line-height:1.5;margin-top:4px}
+/* revenue — aggregates only, never PII */
+.cc-rev{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;border-top:1px solid var(--border)}
+.cc-rev-l{font-size:12.5px;font-weight:700;color:var(--text)}
+.cc-rev-n{font-size:15px;font-weight:800;color:var(--a1);flex-shrink:0}
+.cc-rev-note{font-size:10px;font-weight:600;color:var(--t3);padding:9px 16px 12px;border-top:1px solid var(--border);font-style:italic}
+.cc-live.stale{background:#DC2626}
+.cc-live.err{background:#9CA3AF}
+.cc-win{margin:0 16px 16px;border-radius:var(--r);background:linear-gradient(135deg,#FF5910,#FF8A3D);color:#fff;padding:16px 17px;box-shadow:0 4px 18px rgba(255,89,16,.28);position:relative;overflow:hidden}
+.cc-win-t{font-size:13px;font-weight:800;letter-spacing:.3px}
+.cc-win-b{font-size:13.5px;font-weight:600;line-height:1.45;margin-top:7px}
+.cc-win-q{font-size:12px;font-style:italic;opacity:.9;margin-top:10px;border-top:1px solid rgba(255,255,255,.25);padding-top:10px}
+.cc-win-f{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:10px}
+.cc-streak{font-size:12px;font-weight:800;display:flex;align-items:center;gap:5px}
+.cc-wonbtn{background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.5);color:#fff;font-family:var(--f);font-size:12px;font-weight:800;border-radius:20px;padding:7px 14px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.cc-wonbtn:active{transform:scale(.94)}
+.cc-wonbtn.done{background:#fff;color:#FF5910;border-color:#fff}
+.cc-mail{display:flex;gap:11px;padding:11px 16px;border-top:1px solid var(--border);align-items:flex-start}
+.cc-mail-av{width:30px;height:30px;border-radius:8px;background:var(--surface2);color:var(--a1);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cc-mail-b{flex:1;min-width:0}
+.cc-mail-subj{font-size:12.5px;font-weight:700;color:var(--text);line-height:1.3}
+.cc-mail-prev{font-size:11px;color:var(--t2);margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cc-reply{font-size:9px;font-weight:800;letter-spacing:.4px;color:var(--a2);border:1.5px solid color-mix(in srgb,var(--a2) 35%,transparent);border-radius:20px;padding:2px 8px;flex-shrink:0;background:none;cursor:pointer;font-family:var(--f)}
+.cc-hub{display:flex;gap:11px;padding:11px 16px;border-top:1px solid var(--border);align-items:center;cursor:pointer}
+.cc-hub-ic{width:30px;height:30px;border-radius:8px;background:color-mix(in srgb,var(--a2) 12%,white);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.cc-hub-b{flex:1;min-width:0}
+.cc-hub-n{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-hub-m{font-size:10.5px;color:var(--t3);margin-top:1px}
+.cc-hub-tag{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--t2);background:var(--surface2);border-radius:5px;padding:2px 6px;flex-shrink:0}
+.cc-file{display:flex;gap:11px;padding:10px 16px;border-top:1px solid var(--border);align-items:center}
+.cc-file-ic{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
+.cc-file-b{flex:1;min-width:0}
+.cc-file-n{font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-file-m{font-size:10.5px;color:var(--t3);margin-top:1px}
+.cc-home-card{display:flex;align-items:center;gap:13px;margin:0 16px 18px;padding:15px 16px;border-radius:var(--r);background:linear-gradient(135deg,#002D72,#006BB6);color:#fff;cursor:pointer;box-shadow:0 4px 18px rgba(0,45,114,.28);position:relative;overflow:hidden}
+.cc-home-ic{font-size:26px;flex-shrink:0}
+.cc-home-info{flex:1;min-width:0}
+.cc-home-lbl{font-size:14px;font-weight:800}
+.cc-home-sub{font-size:11.5px;font-weight:600;opacity:.82;margin-top:2px}
+.cc-home-arrow{font-size:22px;opacity:.7}
 
 /* ══════════ HOME ══════════ */
 .dash-hero{
@@ -636,6 +713,55 @@ html,body{
   text-transform:uppercase;margin-bottom:6px}
 .pl-notes textarea{width:100%;border:none;background:transparent;font-family:var(--f);font-size:12.5px;
   line-height:1.45;color:var(--text);resize:vertical;min-height:60px;outline:none}
+.pl-tip{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 12px;margin-bottom:8px}
+.pl-tip:last-child{margin-bottom:0}
+.pl-tip.o{background:var(--pl-o-soft);border-color:rgba(255,89,16,.3)}
+.pl-tip.b{background:var(--pl-b-soft);border-color:rgba(0,107,182,.3)}
+.pl-tip-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}
+.pl-tip-lbl{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+.pl-tip.o .pl-tip-lbl{color:#B34A0A}
+.pl-tip.b .pl-tip-lbl{color:#004B8D}
+.pl-tip-shuffle{background:rgba(0,0,0,.06);border:none;border-radius:6px;width:24px;height:24px;font-size:13px;cursor:pointer;color:var(--t2);flex-shrink:0;display:grid;place-items:center;line-height:1;transition:transform .3s ease}
+.pl-tip-shuffle:active{transform:scale(.9)}
+.pl-tip-shuffle.spin{transform:rotate(180deg)}
+.pl-tip-txt{font-size:13px;font-weight:600;color:var(--text);line-height:1.4}
+.pl-cal-sync{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;color:#16A34A;text-transform:uppercase;letter-spacing:.4px}
+.pl-cal-row{display:flex;align-items:center;gap:11px;padding:9px 0;border-top:1px solid var(--border)}
+.pl-cal-row:first-child{border-top:none}
+.pl-cal-time{font-size:11px;font-weight:800;color:var(--a1);width:66px;flex-shrink:0}
+.pl-cal-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.pl-cal-title{font-size:13px;font-weight:600;color:var(--text)}
+.pl-cal-empty{font-size:12px;color:var(--t3);padding:8px 0}
+
+/* Important Dates tracker (birthdays / dates / times) — shared by Command Center + Planner */
+.id-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border)}
+.id-row:first-child{border-top:none}
+.id-ic{width:30px;height:30px;border-radius:8px;background:var(--surface2);display:flex;
+  align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.id-b{flex:1;min-width:0}
+.id-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.id-date{font-size:10.5px;color:var(--t3);margin-top:1px}
+.id-badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;background:var(--surface2);
+  color:var(--a1);flex-shrink:0;white-space:nowrap}
+.id-badge.soon{background:var(--pl-o-soft);color:#B34A0A}
+.id-badge.today{background:var(--pl-o);color:#fff}
+.id-empty{font-size:12px;color:var(--t3);padding:8px 0}
+.id-del{background:none;border:none;font-size:12px;color:var(--t3);cursor:pointer;padding:2px 4px;flex-shrink:0}
+.id-add{margin-top:8px;background:transparent;border:1.5px dashed var(--border);border-radius:7px;
+  color:var(--t3);font-family:var(--f);font-size:10.5px;font-weight:700;letter-spacing:.3px;
+  padding:8px 10px;cursor:pointer;width:100%;text-transform:uppercase}
+.id-add:active{border-color:var(--a1);color:var(--a1)}
+.id-form{display:none;flex-direction:column;gap:8px;padding:10px;background:var(--surface2);
+  border-radius:9px;margin-top:8px}
+.id-form input,.id-form select{font-family:var(--f);font-size:13px;border:1px solid var(--border);
+  border-radius:7px;padding:8px 10px;background:var(--surface);color:var(--text);width:100%}
+.id-form-row{display:flex;gap:8px}
+.id-form-row>*{flex:1;min-width:0}
+.id-form-actions{display:flex;gap:8px;justify-content:flex-end}
+.id-form-actions button{font-family:var(--f);font-size:12px;font-weight:700;border-radius:7px;
+  padding:7px 12px;border:none;cursor:pointer}
+.id-form-save{background:var(--a1);color:#fff}
+.id-form-cancel{background:var(--surface3);color:var(--t2)}
 .today-card{margin:0 16px 18px;background:var(--surface);border-radius:var(--r);
   border:1px solid var(--border);box-shadow:var(--sh);padding:14px;cursor:pointer;
   display:flex;gap:12px;align-items:center;transition:transform .12s}
@@ -655,7 +781,7 @@ html,body{
 .sidebar{
   display:none;
   position:fixed;top:0;bottom:0;left:0;width:var(--sidebar-w);z-index:220;
-  background:linear-gradient(160deg,#FBE1EA 0%,#FEEEF4 100%);
+  background:linear-gradient(160deg,#FFE4CC 0%,#FFF3E8 100%);
   border-right:1px solid var(--border);
   flex-direction:column;padding:22px 14px 18px;
   overflow-y:auto;
@@ -756,14 +882,18 @@ html,body{
       </svg>
     </div>
     <div class="side-brand-txt">
-      <div class="side-brand-name" id="side-brand-name">Pharin Hub</div>
-      <div class="side-brand-sub" id="side-brand-user">Pharin</div>
+      <div class="side-brand-name" id="side-brand-name">Dave's Hub</div>
+      <div class="side-brand-sub" id="side-brand-user">Dave</div>
     </div>
   </div>
   <div class="side-eyebrow">Navigate</div>
   <button class="side-btn active" data-screen="home">
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
     Home
+  </button>
+  <button class="side-btn" data-screen="command">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+    Command Center
   </button>
   <button class="side-btn" data-screen="browse">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -819,7 +949,7 @@ html,body{
           <circle cx="12" cy="4.2" r="1.3" fill="#002D72"/>
         </svg>
       </div>
-      <div class="app-name" id="hdr-name">Pharin Hub</div>
+      <div class="app-name" id="hdr-name">Dave's Hub</div>
     </div>
     <div class="page-title" id="page-title" style="display:none"></div>
   </div>
@@ -839,24 +969,8 @@ html,body{
   <div class="screen active" id="scr-home">
     <div class="dash-hero">
       <div class="dh-orb1"></div><div class="dh-orb2"></div>
-      <svg viewBox="0 0 24 24" aria-hidden="true"
-           style="position:absolute;top:14px;right:14px;width:56px;height:56px;opacity:.95;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15))">
-        <path d="M5.5 8.5 L6.8 3 L10.5 7.2 Z" fill="#fff"/>
-        <path d="M18.5 8.5 L17.2 3 L13.5 7.2 Z" fill="#fff"/>
-        <path d="M7.2 6.5 L7.8 4.5 L9 6.8 Z" fill="#FF5910"/>
-        <path d="M16.8 6.5 L16.2 4.5 L15 6.8 Z" fill="#FF5910"/>
-        <ellipse cx="12" cy="13.5" rx="6.4" ry="5.8" fill="#fff"/>
-        <circle cx="8.5" cy="15.5" r="0.9" fill="#FCD5E0" opacity=".7"/>
-        <circle cx="15.5" cy="15.5" r="0.9" fill="#FCD5E0" opacity=".7"/>
-        <circle cx="10" cy="13.2" r="0.75" fill="#0B1F3A"/>
-        <circle cx="14" cy="13.2" r="0.75" fill="#0B1F3A"/>
-        <path d="M11.4 15.2 L12.6 15.2 L12 16 Z" fill="#006BB6"/>
-        <path d="M8.5 3.5 Q6.5 2.5 6.5 4.8 Q6.5 6 8.8 4.8 Z" fill="#006BB6"/>
-        <path d="M15.5 3.5 Q17.5 2.5 17.5 4.8 Q17.5 6 15.2 4.8 Z" fill="#006BB6"/>
-        <circle cx="12" cy="4.2" r="1.3" fill="#002D72"/>
-      </svg>
       <div class="dh-greeting">Welcome back 👋</div>
-      <div class="dh-name" id="dh-name">Pharin</div>
+      <div class="dh-name" id="dh-name">Dave</div>
       <div class="ticker in-hero" aria-live="polite">
         <div class="ticker-body">
           <span class="ticker-num" id="ticker-num">1</span>
@@ -871,12 +985,22 @@ html,body{
     </div>
     <div class="qa-row">
       <div class="qa" onclick="openAddForm()"><em>✨</em> Add Entry</div>
+      <div class="qa" onclick="goScreen('command')"><em>🎛️</em> Command Center</div>
       <div class="qa" onclick="goScreen('planner')"><em>📅</em> Today's Plan</div>
       <div class="qa" onclick="surpriseMe()"><em>🎲</em> Surprise Me</div>
       <div class="qa" onclick="goScreen('search')"><em>🔎</em> Search</div>
       <div class="qa" onclick="goScreen('tiktok')"><em>🎵</em> TikTok</div>
       <div class="qa" onclick="goScreen('io')"><em>📤</em> Import/Export</div>
       <div class="qa" onclick="filterMust()"><em>🔥</em> Must Do</div>
+    </div>
+    <div class="cc-home-card" onclick="goScreen('command')">
+      <div class="dh-orb1"></div>
+      <div class="cc-home-ic">🎛️</div>
+      <div class="cc-home-info">
+        <div class="cc-home-lbl">Office Command Center</div>
+        <div class="cc-home-sub">9 meetings · 40+ unread · 8 hubs today</div>
+      </div>
+      <div class="cc-home-arrow">›</div>
     </div>
     <div class="today-card" id="today-card" onclick="goScreen('planner')">
       <div class="today-card-ico">📅</div>
@@ -899,6 +1023,108 @@ html,body{
     </div>
     <div class="sec-row"><div class="sec-lbl">Recently Added</div><div class="sec-link" onclick="goScreen('search')">See All →</div></div>
     <div class="feed-wrap" id="home-feed"></div>
+  </div>
+
+  <!-- OFFICE COMMAND CENTER -->
+  <div class="screen" id="scr-command">
+    <div class="cc-hero">
+      <div class="dh-orb1"></div><div class="dh-orb2"></div>
+      <div class="cc-eyebrow">Office Command Center</div>
+      <div class="cc-greet" id="cc-greet">Good morning, Dave</div>
+      <div class="cc-when"><b id="cc-date">—</b><span id="cc-time">—</span></div>
+      <div class="cc-src">
+        <span class="cc-live" id="cc-live-dot"></span>
+        <span id="cc-loaded">Connecting…</span>
+      </div>
+    </div>
+
+    <div class="cc-stats">
+      <div class="cc-stat"><div class="cc-stat-n" id="cc-stat-events">—</div><div class="cc-stat-l">Events Today</div><div class="cc-stat-s" id="cc-stat-events-s">loading…</div></div>
+      <div class="cc-stat"><div class="cc-stat-n" id="cc-stat-left">—</div><div class="cc-stat-l">Still Ahead</div><div class="cc-stat-s" id="cc-stat-left-s">today</div></div>
+      <div class="cc-stat"><div class="cc-stat-n" id="cc-stat-dates">—</div><div class="cc-stat-l">Important Dates</div><div class="cc-stat-s" id="cc-stat-dates-s">tracked</div></div>
+      <div class="cc-stat"><div class="cc-stat-n" id="cc-stat-content">—</div><div class="cc-stat-l">Content Queue</div><div class="cc-stat-s" id="cc-stat-content-s">in Notion</div></div>
+    </div>
+
+    <div class="cc-win">
+      <div class="cc-win-t">🏆 WIN THE DAY</div>
+      <div class="cc-win-b">⚡ Crush your 8 AM Day Trading prep—identify targets, execute the plan, lock in your first W before noon.</div>
+      <div class="cc-win-q">"Your future self is watching. Make them proud."</div>
+      <div class="cc-win-f">
+        <div class="cc-streak">🔥 <span id="cc-streak-n">1</span>-day win streak</div>
+        <button class="cc-wonbtn" id="cc-wonbtn" onclick="markWonToday(this)">Mark today won</button>
+      </div>
+    </div>
+    <div class="pl-quote-wrap" aria-live="polite" style="margin:0 16px 16px">
+      <div class="pl-quote-head">
+        <span class="pl-quote-lbl">Daily Motivation</span>
+        <button class="pl-quote-shuffle" id="pl-quote-shuffle" aria-label="Shuffle to next quote" title="Shuffle">⟳</button>
+      </div>
+      <div class="pl-quote-txt" id="pl-quote-txt">—</div>
+      <div class="pl-quote-src" id="pl-quote-src">—</div>
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card-hd"><div class="cc-card-t">🎂 Important Dates</div><div class="cc-card-c" id="id-count-cc">—</div></div>
+      <div class="pad" style="padding-top:0">
+        <div id="id-list-cc"></div>
+        <button type="button" class="id-add" onclick="idToggleForm('cc')">+ Add important date</button>
+        <div class="id-form" id="id-form-cc"></div>
+      </div>
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card-hd"><div class="cc-card-t">🗓 Today's Agenda</div><div class="cc-card-c" id="cc-ag-count">—</div></div>
+      <div id="cc-agenda"><div class="cc-ag-empty">Loading today's agenda…</div></div>
+    </div>
+
+    <div class="cc-card" id="cc-prio-card" hidden>
+      <div class="cc-card-hd"><div class="cc-card-t">🎯 Today's Priorities</div><div class="cc-card-c" id="cc-prio-src">Master Planner</div></div>
+      <div id="cc-prios"></div>
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card-hd"><div class="cc-card-t">🧡 The Five Agreements 💙</div><div class="cc-card-c">daily</div></div>
+      <div id="cc-agreements" class="cc-fa-wrap"></div>
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card-hd"><div class="cc-card-t">🌅 Vision Board</div><div class="cc-card-c" id="cc-vision-c">—</div></div>
+      <div id="cc-vision" class="cc-vb-wrap"></div>
+    </div>
+
+    <div class="cc-card" id="cc-rev-card" hidden>
+      <div class="cc-card-hd"><div class="cc-card-t">📣 Revenue Engine</div><div class="cc-card-c" id="cc-rev-src">DPowellTC</div></div>
+      <div id="cc-revenue"></div>
+      <div class="cc-rev-note">Aggregate counts only — no client details are published here.</div>
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card-hd"><div class="cc-card-t">📥 Inbox Triage</div><div class="cc-card-c">40 unread</div></div>
+      <div class="cc-mail"><div class="cc-mail-av">U</div><div class="cc-mail-b"><div class="cc-mail-subj">Your Daily Digest for Tue, 7/14 is ready to view</div><div class="cc-mail-prev">Coming to you soon — you have 1 mailpiece and 0 inbound packages arriving today.</div></div><button class="cc-reply">Reply?</button></div>
+      <div class="cc-mail"><div class="cc-mail-av">n</div><div class="cc-mail-b"><div class="cc-mail-subj">🏆 Ranch wins</div><div class="cc-mail-prev">Plus: a sip of really old soup, Wordle for catastrophes, and more.</div></div><button class="cc-reply">Reply?</button></div>
+      <div class="cc-mail"><div class="cc-mail-av">n</div><div class="cc-mail-b"><div class="cc-mail-subj">The Morning: In the public interest</div><div class="cc-mail-prev">Plus, the Strait of Hormuz, sugar in space and Jay-Z at Yankee Stadium.</div></div><button class="cc-reply">Reply?</button></div>
+      <div class="cc-mail"><div class="cc-mail-av">c</div><div class="cc-mail-b"><div class="cc-mail-subj">David, ready to meet someone new?</div><div class="cc-mail-prev">Today's picks are ready for you. It only takes one match to change everything.</div></div><button class="cc-reply">Reply?</button></div>
+      <div class="cc-mail"><div class="cc-mail-av">P</div><div class="cc-mail-b"><div class="cc-mail-subj">Payroll & Client Service Specialist (UKG Ready required)</div><div class="cc-mail-prev">Payroll Office of America, LLC · 20 more new jobs matching your search.</div></div><button class="cc-reply">Reply?</button></div>
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card-hd"><div class="cc-card-t">✅ Tasks &amp; Projects</div><div class="cc-card-c">8 hubs</div></div>
+      <div class="cc-hub"><div class="cc-hub-ic">📁</div><div class="cc-hub-b"><div class="cc-hub-n">Projects &amp; Tasks</div><div class="cc-hub-m">page · updated Aug 28</div></div><div class="cc-hub-tag">Notion</div></div>
+      <div class="cc-hub"><div class="cc-hub-ic">🗂️</div><div class="cc-hub-b"><div class="cc-hub-n">Tasks</div><div class="cc-hub-m">database · updated Jul 13</div></div><div class="cc-hub-tag">DB</div></div>
+      <div class="cc-hub"><div class="cc-hub-ic">📊</div><div class="cc-hub-b"><div class="cc-hub-n">Project X – Weekly report</div><div class="cc-hub-m">page · updated Jul 6</div></div><div class="cc-hub-tag">Notion</div></div>
+      <div class="cc-hub"><div class="cc-hub-ic">📋</div><div class="cc-hub-b"><div class="cc-hub-n">Projects</div><div class="cc-hub-m">database · updated Jul 21</div></div><div class="cc-hub-tag">DB</div></div>
+      <div class="cc-hub"><div class="cc-hub-ic">🚀</div><div class="cc-hub-b"><div class="cc-hub-n">Personal Development Command Center</div><div class="cc-hub-m">Growth Engine — Habits &amp; Tasks · updated Apr 23</div></div><div class="cc-hub-tag">Notion</div></div>
+    </div>
+
+    <div class="cc-card" style="margin-bottom:24px">
+      <div class="cc-card-hd"><div class="cc-card-t">📄 Recent Files</div><div class="cc-card-c">7 recent</div></div>
+      <div class="cc-file"><div class="cc-file-ic" style="background:#3A5578">DOC</div><div class="cc-file-b"><div class="cc-file-n">NSE-Lab5-David-Powell</div><div class="cc-file-m">modified Jul 14</div></div></div>
+      <div class="cc-file"><div class="cc-file-ic" style="background:#006BB6">MD</div><div class="cc-file-b"><div class="cc-file-n">D4D_Projects.md</div><div class="cc-file-m">modified Jul 13</div></div></div>
+      <div class="cc-file"><div class="cc-file-ic" style="background:#3A5578">DOC</div><div class="cc-file-b"><div class="cc-file-n">Birthday_Anniversary_Automation_Setup_Guide</div><div class="cc-file-m">modified Jul 13</div></div></div>
+      <div class="cc-file"><div class="cc-file-ic" style="background:#E8590C">HTM</div><div class="cc-file-b"><div class="cc-file-n">tiktok-recipe-search.html</div><div class="cc-file-m">modified Jul 11</div></div></div>
+      <div class="cc-file"><div class="cc-file-ic" style="background:#006BB6">MD</div><div class="cc-file-b"><div class="cc-file-n">Night_Recovery_Pack_DIY_Guide.md</div><div class="cc-file-m">modified Jul 10</div></div></div>
+      <div class="cc-file"><div class="cc-file-ic" style="background:#E8590C">HTM</div><div class="cc-file-b"><div class="cc-file-n">pharin-hubv21.html</div><div class="cc-file-m">modified Jul 9</div></div></div>
+    </div>
   </div>
 
   <!-- BROWSE -->
@@ -1015,14 +1241,6 @@ html,body{
         <div class="pl-focus-lbl">Today's focus</div>
         <input class="pl-focus" id="pl-focus" type="text" maxlength="120"
                placeholder="One outcome that makes today a win">
-        <div class="pl-quote-wrap" aria-live="polite">
-          <div class="pl-quote-head">
-            <span class="pl-quote-lbl">Daily Motivation</span>
-            <button class="pl-quote-shuffle" id="pl-quote-shuffle" aria-label="Shuffle to next quote" title="Shuffle">⟳</button>
-          </div>
-          <div class="pl-quote-txt" id="pl-quote-txt">—</div>
-          <div class="pl-quote-src" id="pl-quote-src">—</div>
-        </div>
       </div>
     </div>
 
@@ -1033,6 +1251,29 @@ html,body{
     </div>
 
     <div class="pl-card">
+      <h3>👑 Daily Wisdom for Kings</h3>
+      <div class="pl-sub">Growth, self-care, and love — tap ⟳ for a new prompt.</div>
+      <div id="pl-tips"></div>
+    </div>
+
+    <div class="pl-card">
+      <h3>📆 Calendar</h3>
+      <div class="pl-sub" style="display:flex;align-items:center;justify-content:space-between">
+        <span id="pl-cal-count">—</span>
+        <span class="pl-cal-sync" id="pl-cal-sync-badge"><span style="width:7px;height:7px;border-radius:50%;background:#9CA3AF;display:inline-block"></span> Google · —</span>
+      </div>
+      <div id="pl-cal-list"></div>
+    </div>
+
+    <div class="pl-card">
+      <h3>🎂 Important Dates &amp; Birthdays</h3>
+      <div class="pl-sub" id="id-count-pl">Never miss what matters. Updates automatically.</div>
+      <div id="id-list-pl"></div>
+      <button type="button" class="id-add" onclick="idToggleForm('pl')">+ Add important date</button>
+      <div class="id-form" id="id-form-pl"></div>
+    </div>
+
+    <div class="pl-card">
       <h3>🎯 Top Priorities for the Day</h3>
       <div class="pl-sub">One clear intention for each part of life.</div>
       <div class="pl-prio-list" id="pl-priorities"></div>
@@ -1040,7 +1281,10 @@ html,body{
 
     <div class="pl-card">
       <h3>🗓️ Today's Schedule</h3>
-      <div class="pl-sub">6 AM – 9 PM. Your recurring blocks are pre-filled.</div>
+      <div class="pl-sub" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <span>6 AM – 9 PM. Your recurring blocks are pre-filled.</span>
+        <span class="pl-cal-sync" id="pl-sched-sync"><span style="width:7px;height:7px;border-radius:50%;background:#9CA3AF;display:inline-block"></span> Notion · —</span>
+      </div>
       <div class="pl-legs" id="pl-legs"></div>
     </div>
 
@@ -1215,7 +1459,7 @@ const ICONS=['🍽️','🎬','📚','🎉','🎯','🛍️','🎵','🌍','💪
 const PLATFORMS=['Netflix','Hulu','Disney+','HBO Max','Amazon','Apple TV+','YouTube','Theater','Cinema','Other'];
 
 // ═══════ CONFIG ═══════
-function lCfg(){return JSON.parse(localStorage.getItem('ahub-cfg')||JSON.stringify({appName:'Pharin Hub',userName:'Pharin',themeIdx:0}));}
+function lCfg(){return JSON.parse(localStorage.getItem('ahub-cfg')||JSON.stringify({appName:"Dave's Hub",userName:'Dave',themeIdx:0}));}
 function sCfg(){localStorage.setItem('ahub-cfg',JSON.stringify(cfg));}
 let cfg=lCfg();
 
@@ -1310,6 +1554,248 @@ let curScreen='home';
 let curCatId='place';
 let catStat='all', catSub='', prevScreen='home';
 
+function ccRefresh(){
+  const now = new Date();
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const mons=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const g = document.getElementById('cc-greet');
+  const h = now.getHours();
+  if(g) g.textContent = (h<12?'Good morning':h<17?'Good afternoon':'Good evening')+', Dave';
+  const d = document.getElementById('cc-date');
+  if(d) d.textContent = days[now.getDay()]+', '+mons[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
+  const t = document.getElementById('cc-time');
+  if(t){ let hh=now.getHours(),m=now.getMinutes(); const ap=hh<12?'AM':'PM'; hh=hh%12||12; t.textContent=hh+':'+String(m).padStart(2,'0')+' '+ap; }
+  const streak = parseInt(localStorage.getItem('ccStreak')||'1',10);
+  const sn = document.getElementById('cc-streak-n'); if(sn) sn.textContent=streak;
+  const btn = document.getElementById('cc-wonbtn');
+  if(btn){
+    const wonDate = localStorage.getItem('ccWonDate');
+    const today = now.toDateString();
+    if(wonDate===today){ btn.classList.add('done'); btn.textContent='✓ Won today'; }
+    else { btn.classList.remove('done'); btn.textContent='Mark today won'; }
+  }
+  if(typeof renderImportantDates==='function') renderImportantDates();
+  // Keep the "synced Nm ago" label and the Now pill honest between polls.
+  if(typeof ccLastSync!=='undefined' && ccLastSync){ ccSetLive('ok', ccSyncLabel()); ccRenderAgenda(); ccRenderStats(); }
+}
+function markWonToday(btn){
+  const today = new Date().toDateString();
+  if(localStorage.getItem('ccWonDate')===today){ showToast('Already logged today 🔥'); return; }
+  let streak = parseInt(localStorage.getItem('ccStreak')||'1',10)+1;
+  localStorage.setItem('ccStreak',streak);
+  localStorage.setItem('ccWonDate',today);
+  document.getElementById('cc-streak-n').textContent=streak;
+  btn.classList.add('done'); btn.textContent='✓ Won today';
+  showToast('🔥 '+streak+'-day win streak!');
+}
+
+/* ═══════ COMMAND CENTER — NOTION SYNC ═══════
+   Compiles Master Planner + Command Center data behind one 5-minute poll.
+   API base holds the Notion token server-side; nothing secret ships in this file.
+   /api/command-center is optional — if it 404s the UI falls back and stays quiet. */
+const CC_API = 'https://planner.romeobravos.net';
+const CC_SYNC_MS = 5*60*1000;
+
+/* Baked from Master Planner. Static reference content, so it renders instantly
+   and still works offline; the API overwrites it when the endpoint is live. */
+const CC_FALLBACK = {
+  agreements:[
+    {n:'1️⃣',t:'Be Impeccable with Your Word'},
+    {n:'2️⃣',t:"Don't Take Anything Personally"},
+    {n:'3️⃣',t:"Don't Make Assumptions"},
+    {n:'4️⃣',t:'Always Do Your Best'},
+    {n:'5️⃣',t:'Be Skeptical, but Learn to Listen'}
+  ],
+  vision:[
+    {ic:'🙏',t:'Faith & Mindset',l:'Daily gratitude · Stay grounded in purpose · Keep the Five Agreements in motion'},
+    {ic:'💪',t:'Health & Energy',l:'Move daily · Fuel my body well · Protect rest and recovery'},
+    {ic:'📈',t:'Trading & Wealth',l:'Trade with discipline · Protect capital first · Build consistent income systems'},
+    {ic:'🎓',t:'Learning & Career',l:'Grow cybersecurity skills · Finish coursework strong · Build confidence through practice'},
+    {ic:'🏝️',t:'Lifestyle & Legacy',l:'Create freedom with structure · Travel with purpose · Build something meaningful'},
+    {ic:'🐾',t:'Joy & Connection',l:'Enjoy time with Broly · Stay present with loved ones · Celebrate small wins'}
+  ]
+};
+
+let ccData = { events:[], prios:[], agreements:CC_FALLBACK.agreements, vision:CC_FALLBACK.vision, revenue:null, dates:[] };
+let ccLastSync = null, _ccSyncTimer = null, _ccSyncing = false;
+
+function ccMinutes(t){
+  const m = String(t||'').trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+  if(!m) return null;
+  let h = +m[1]; const mi = +m[2], ap = (m[3]||'').toUpperCase();
+  if(ap==='PM' && h!==12) h+=12;
+  if(ap==='AM' && h===12) h=0;
+  return h*60+mi;
+}
+
+function ccSetLive(kind,label){
+  const dot = document.getElementById('cc-live-dot');
+  if(dot){ dot.classList.remove('stale','err'); if(kind!=='ok') dot.classList.add(kind); }
+  const el = document.getElementById('cc-loaded');
+  if(el) el.textContent = label;
+}
+
+async function ccGet(path){
+  const ctl = new AbortController();
+  const to = setTimeout(()=>ctl.abort(), 12000);
+  try{
+    const r = await fetch(CC_API+path,{cache:'no-store',signal:ctl.signal});
+    if(!r.ok) return null;
+    return await r.json();
+  }catch(_){ return null; }
+  finally{ clearTimeout(to); }
+}
+
+function ccRenderAgenda(){
+  const wrap = document.getElementById('cc-agenda');
+  const cnt = document.getElementById('cc-ag-count');
+  if(!wrap) return;
+  const evs = ccData.events || [];
+  if(cnt) cnt.textContent = evs.length ? evs.length+(evs.length===1?' event':' events') : '—';
+  if(!evs.length){
+    wrap.innerHTML = '<div class="cc-ag-empty">'+(ccLastSync?'Nothing scheduled today 🎉':'Agenda unavailable — will retry')+'</div>';
+    return;
+  }
+  const nowM = new Date().getHours()*60 + new Date().getMinutes();
+  // "Now" = the latest event already started, within 90m and before the next one starts.
+  let nowIdx = -1;
+  evs.forEach((e,i)=>{
+    const m = ccMinutes(e.time);
+    if(m===null || e.allDay) return;
+    if(m<=nowM && nowM-m<90){
+      const nxt = evs.slice(i+1).map(x=>ccMinutes(x.time)).find(x=>x!==null);
+      if(nxt===undefined || nowM < nxt) nowIdx = i;
+    }
+  });
+  wrap.innerHTML = evs.map((e,i)=>{
+    const m = ccMinutes(e.time);
+    const done = m!==null && !e.allDay && i!==nowIdx && m<nowM;
+    const cls = 'cc-ag'+(i===nowIdx?' now':'')+(done?' done':'');
+    const time = i===nowIdx ? 'now' : (e.allDay?'all day':(e.time||''));
+    return '<div class="'+cls+'"><div class="cc-ag-time">'+ccEsc(time)+'</div>'+
+      '<div class="cc-ag-title">'+ccEsc(e.title||'')+(i===nowIdx?'<span class="cc-nowpill">Now</span>':'')+'</div></div>';
+  }).join('');
+}
+
+function ccEsc(s){ const d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
+
+function ccRenderPrios(){
+  const card = document.getElementById('cc-prio-card');
+  const wrap = document.getElementById('cc-prios');
+  if(!card||!wrap) return;
+  const p = ccData.prios||[];
+  // Hidden until the endpoint is live, so an unbuilt endpoint never reads as "no priorities today".
+  if(!p.length){ card.hidden = true; return; }
+  card.hidden = false;
+  wrap.innerHTML = p.map(x=>'<div class="cc-prio"><div class="cc-prio-ic">🪴</div><div class="cc-prio-b">'+
+    '<div class="cc-prio-k">'+ccEsc(x.kind||'')+'</div><div class="cc-prio-v">'+ccEsc(x.text||'')+'</div></div></div>').join('');
+}
+
+function ccRenderStatic(){
+  const a = document.getElementById('cc-agreements');
+  if(a) a.innerHTML = (ccData.agreements||[]).map(x=>'<div class="cc-fa"><em>'+ccEsc(x.n)+'</em>'+ccEsc(x.t)+'</div>').join('');
+  const v = document.getElementById('cc-vision');
+  if(v) v.innerHTML = (ccData.vision||[]).map(x=>'<div class="cc-vb"><div class="cc-vb-t">'+ccEsc(x.ic)+' '+ccEsc(x.t)+
+    '</div><div class="cc-vb-l">'+ccEsc(x.l)+'</div></div>').join('');
+  const vc = document.getElementById('cc-vision-c');
+  if(vc){ const n=(ccData.vision||[]).length; vc.textContent = n+(n===1?' pillar':' pillars'); }
+}
+
+function ccRenderRevenue(){
+  const card = document.getElementById('cc-rev-card');
+  const wrap = document.getElementById('cc-revenue');
+  if(!card||!wrap) return;
+  const r = ccData.revenue;
+  // Hidden until the endpoint is live — an empty shell is worse than no card.
+  if(!r || !Array.isArray(r.rows) || !r.rows.length){ card.hidden = true; return; }
+  card.hidden = false;
+  wrap.innerHTML = r.rows.map(x=>'<div class="cc-rev"><div class="cc-rev-l">'+ccEsc(x.label)+
+    '</div><div class="cc-rev-n">'+ccEsc(x.value)+'</div></div>').join('');
+}
+
+function ccRenderStats(){
+  const evs = ccData.events||[];
+  const nowM = new Date().getHours()*60 + new Date().getMinutes();
+  const left = evs.filter(e=>{ const m=ccMinutes(e.time); return m!==null && m>nowM; }).length;
+  const next = evs.find(e=>{ const m=ccMinutes(e.time); return m!==null && m>nowM; });
+  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('cc-stat-events', evs.length||'0');
+  set('cc-stat-events-s', next ? 'next: '+next.title+' · '+next.time : (evs.length?'all done today':'nothing scheduled'));
+  set('cc-stat-left', left);
+  set('cc-stat-left-s', left===1?'event remaining':'events remaining');
+  set('cc-stat-dates', (impDates||[]).length);
+  set('cc-stat-dates-s','tracked');
+  const c = ccData.revenue && ccData.revenue.contentQueue;
+  set('cc-stat-content', c==null?'—':c);
+  set('cc-stat-content-s', c==null?'connect API':'in Content Pipeline');
+}
+
+function ccRenderAll(){ ccRenderAgenda(); ccRenderPrios(); ccRenderStatic(); ccRenderRevenue(); ccRenderStats(); }
+
+async function ccSync(force){
+  if(_ccSyncing) return;
+  _ccSyncing = true;
+  ccSetLive('ok','Syncing Notion…');
+  try{
+    const iso = (typeof plTodayISO==='function') ? plTodayISO() : new Date().toISOString().slice(0,10);
+    const [ev, cc] = await Promise.all([
+      ccGet('/api/today-events?date='+encodeURIComponent(iso)),
+      ccGet('/api/command-center')
+    ]);
+    let ok = false;
+    if(ev && ev.found && Array.isArray(ev.events)){ ccData.events = ev.events; ok = true; }
+    if(cc && typeof cc==='object'){
+      if(Array.isArray(cc.priorities)) ccData.prios = cc.priorities;
+      if(Array.isArray(cc.agreements) && cc.agreements.length) ccData.agreements = cc.agreements;
+      if(Array.isArray(cc.vision) && cc.vision.length) ccData.vision = cc.vision;
+      if(cc.revenue) ccData.revenue = cc.revenue;
+      if(Array.isArray(cc.importantDates) && cc.importantDates.length) ccMergeDates(cc.importantDates);
+      ok = true;
+    }
+    ccLastSync = ok ? new Date() : ccLastSync;
+    ccRenderAll();
+    if(typeof renderImportantDates==='function') renderImportantDates();
+    ccSetLive(ok?'ok':'err', ok ? ccSyncLabel() : 'Offline — showing last known');
+  }catch(_){
+    ccSetLive('err','Sync failed — will retry');
+  }finally{ _ccSyncing = false; }
+}
+
+function ccSyncLabel(){
+  if(!ccLastSync) return 'Notion · not synced yet';
+  const age = Math.round((Date.now()-ccLastSync.getTime())/60000);
+  let h=ccLastSync.getHours(), m=ccLastSync.getMinutes(); const ap=h<12?'AM':'PM'; h=h%12||12;
+  const stamp = h+':'+String(m).padStart(2,'0')+' '+ap;
+  const dot = document.getElementById('cc-live-dot');
+  if(dot){ dot.classList.remove('stale'); if(age>11) dot.classList.add('stale'); }
+  return 'Notion · Calendar — synced '+(age<1?'just now':age+'m ago')+' ('+stamp+')';
+}
+
+function ccMergeDates(remote){
+  // Notion is authoritative for its own rows; locally-added entries survive.
+  const local = (impDates||[]).filter(d=>!d.notionId);
+  const mapped = remote.map(d=>({
+    id: 'ntn_'+d.id, notionId: d.id, kind: d.kind||'date',
+    name: d.name||'', date: d.date||'', time: d.time||'', recurring: !!d.recurring
+  }));
+  impDates = mapped.concat(local);
+  if(typeof sImpDates==='function') sImpDates();
+}
+
+function ccStartSync(){
+  ccStopSync();
+  ccSync();
+  _ccSyncTimer = setInterval(()=>{ if(!document.hidden) ccSync(); }, CC_SYNC_MS);
+}
+function ccStopSync(){ if(_ccSyncTimer){ clearInterval(_ccSyncTimer); _ccSyncTimer=null; } }
+
+// A phone that slept for an hour should not show hour-old data.
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden || curScreen!=='command') return;
+  if(!ccLastSync || Date.now()-ccLastSync.getTime() > CC_SYNC_MS) ccSync();
+  else ccSetLive('ok', ccSyncLabel());
+});
+
 function goScreen(s,btn){
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
@@ -1330,7 +1816,11 @@ function goScreen(s,btn){
   if(s==='settings') renderSettings();
   if(s==='planner') renderPlanner();
   if(s==='tiktok') renderTiktok();
+  if(s==='command'){ ccRefresh(); ccRenderAll(); ccStartClock(); ccStartSync(); } else { ccStopClock(); ccStopSync(); }
 }
+let _ccTimer=null;
+function ccStartClock(){ ccStopClock(); _ccTimer=setInterval(ccRefresh,1000*30); }
+function ccStopClock(){ if(_ccTimer){ clearInterval(_ccTimer); _ccTimer=null; } }
 
 function openCat(id){
   curCatId=id; catStat='all'; catSub='';
@@ -2070,6 +2560,7 @@ const PL_BLANK = () => ({
     evening:   PL_DEFAULT_CHECKS.evening.map(t   => ({t, d:false}))
   },
   schedule: {...PL_DEFAULT_SCHEDULE},
+  scheduleSyncedFrom: {},
   review: {
     highlight:"", enjoyed:["","",""], notEnjoyed:["","",""],
     challenges:["","",""], changes:["","",""], notes:""
@@ -2101,6 +2592,7 @@ function plLoad(iso){
           evening:   saved.checks?.evening   || plState.checks.evening
         },
         schedule:{...plState.schedule, ...(saved.schedule||{})},
+        scheduleSyncedFrom:{...plState.scheduleSyncedFrom, ...(saved.scheduleSyncedFrom||{})},
         review:{...plState.review, ...(saved.review||{})}
       };
     }
@@ -2130,7 +2622,8 @@ function plFmt12(h){
 function plRenderAll(){
   plRenderHero(); plRenderAgreements(); plRenderPriorities();
   plRenderChecklists(); plRenderSchedule(); plRenderReview();
-  plRenderQuote();
+  plRenderQuote(); plRenderTips(); plRenderCalendar();
+  if(typeof renderImportantDates==='function') renderImportantDates();
 }
 function plRenderHero(){
   const iso = document.getElementById("pl-datepick").value;
@@ -2209,6 +2702,49 @@ function plRenderSchedule(){
     leg.append(t, ta); wrap.append(leg);
   });
 }
+function plNotionSyncStatus(kind, label){
+  const el = document.getElementById("pl-sched-sync");
+  if(!el) return;
+  const colors = { ok:"#16A34A", pending:"#9CA3AF", err:"#DC2626" };
+  el.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:'+(colors[kind]||colors.pending)+';display:inline-block"></span> Notion · '+label;
+}
+async function plSyncNotionSchedule(){
+  const dpEl = document.getElementById("pl-datepick");
+  const iso = dpEl ? dpEl.value : plTodayISO();
+  if(iso !== plTodayISO()) return;
+  plNotionSyncStatus('pending','Syncing…');
+  try{
+    const res = await fetch('https://planner.romeobravos.net/api/today-schedule', {cache:'no-store'});
+    if(!res.ok) throw new Error('bad status '+res.status);
+    const data = await res.json();
+    if(!data || !data.found || !data.hours){
+      plNotionSyncStatus('pending','No data yet');
+      return;
+    }
+    if(!plState.scheduleSyncedFrom) plState.scheduleSyncedFrom = {};
+    let changed = false;
+    Object.keys(data.hours).forEach(hKey=>{
+      const h = Number(hKey);
+      const notionVal = data.hours[hKey];
+      const current = plState.schedule[h] || "";
+      const lastSynced = plState.scheduleSyncedFrom[h];
+      const baseline = PL_DEFAULT_SCHEDULE[h] || "";
+      const safeToOverwrite = current === "" || current === baseline || (lastSynced !== undefined && current === lastSynced);
+      if(safeToOverwrite && current !== notionVal){
+        plState.schedule[h] = notionVal;
+        changed = true;
+      }
+      plState.scheduleSyncedFrom[h] = notionVal;
+    });
+    if(changed){
+      plRenderSchedule();
+      plScheduleSave();
+    }
+    plNotionSyncStatus('ok','Synced');
+  }catch(e){
+    plNotionSyncStatus('err','Offline');
+  }
+}
 function plRenderReview(){
   document.getElementById("pl-highlight").value = plState.review.highlight;
   document.getElementById("pl-notes").value = plState.review.notes;
@@ -2230,6 +2766,7 @@ function renderPlanner(){
     document.getElementById("pl-datepick").value = plTodayISO();
   }
   plLoad(document.getElementById("pl-datepick").value);
+  plSyncNotionSchedule();
 }
 function plShiftDay(delta){
   const d = new Date(document.getElementById("pl-datepick").value+"T12:00:00");
@@ -2278,10 +2815,12 @@ document.getElementById("pl-datepick").onchange = e=>plLoad(e.target.value);
 document.getElementById("pl-datepick").value = plTodayISO();
 refreshTodayCard();
 setInterval(()=>{ if(curScreen==='planner') plRenderSchedule(); }, 60000);
+setInterval(()=>{ if(curScreen==='planner') plSyncNotionSchedule(); }, 60*60*1000);
+setInterval(()=>{ if(curScreen==='planner') plRenderCalendar(); }, 60*60*1000);
 
 // ══════════ DAILY MOTIVATION QUOTES ══════════
-// Short, widely-attributed aphorisms from Black women — activists, writers,
-// leaders, athletes. Kept brief and attributed to their source.
+// Short, widely-attributed aphorisms from Black women and men — activists,
+// writers, leaders, athletes. Kept brief and attributed to their source.
 const PL_QUOTES = [
   {t:"Truth is powerful and it prevails.",                              by:"Sojourner Truth"},
   {t:"Every great dream begins with a dreamer.",                        by:"Harriet Tubman"},
@@ -2310,7 +2849,20 @@ const PL_QUOTES = [
   {t:"When I dare to be powerful, my fears become less important.",     by:"Audre Lorde"},
   {t:"In nature nothing is perfect and everything is perfect.",         by:"Alice Walker"},
   {t:"It is important that we forgive ourselves.",                      by:"Iyanla Vanzant"},
-  {t:"A lot of people won't do things because they don't want to go naked.", by:"Nikki Giovanni"}
+  {t:"A lot of people won't do things because they don't want to go naked.", by:"Nikki Giovanni"},
+  {t:"If there is no struggle, there is no progress.",                   by:"Frederick Douglass"},
+  {t:"The time is always right to do what is right.",                    by:"Martin Luther King Jr."},
+  {t:"Faith is taking the first step even when you don't see the staircase.", by:"Martin Luther King Jr."},
+  {t:"He who is not courageous enough to take risks will accomplish nothing.", by:"Muhammad Ali"},
+  {t:"Service to others is the rent you pay for your room here on earth.", by:"Muhammad Ali"},
+  {t:"A life is not important except in the impact it has on other lives.", by:"Jackie Robinson"},
+  {t:"Success is measured not by position but by obstacles overcome.",   by:"Booker T. Washington"},
+  {t:"Education is the passport to the future.",                         by:"Malcolm X"},
+  {t:"It always seems impossible until it's done.",                      by:"Nelson Mandela"},
+  {t:"A winner is a dreamer who never gives up.",                        by:"Nelson Mandela"},
+  {t:"Change will not come if we wait for some other person.",           by:"Barack Obama"},
+  {t:"The best way to not feel hopeless is to get up and do something.", by:"Barack Obama"},
+  {t:"Excellence is the best deterrent to racism.",                      by:"Jesse Owens"}
 ];
 
 function plPickQuoteForDate(iso){
@@ -2356,6 +2908,274 @@ document.getElementById("pl-quote-shuffle").addEventListener("click", ()=>{
   setTimeout(()=>btn.classList.remove("spin"), 350);
   plScheduleSave();
 });
+
+// ══════════ DAILY WISDOM FOR KINGS + GOOGLE CALENDAR ══════════
+const PL_GROWTH = [
+  "Read 10 pages before you touch your phone.",
+  "Name one skill you'll sharpen this week.",
+  "Ask for feedback from a man you respect.",
+  "Write down one lesson today taught you.",
+  "Do one thing that scares you a little.",
+  "Protect your mornings — that's where you win.",
+  "Master your money: track every dollar today.",
+  "Sit with your own thoughts for five quiet minutes."
+];
+const PL_CARE = [
+  "Check in with your body — water, breath, stretch.",
+  "It's okay to not be okay. Say it out loud.",
+  "Call a brother you trust and be honest with him.",
+  "Move your body for 20 minutes today.",
+  "Forgive yourself for something you've been carrying.",
+  "Therapy is strength, not weakness.",
+  "Rest without guilt — you've earned it.",
+  "Speak to yourself like someone you love."
+];
+const PL_REL = [
+  "Listen to understand, not to reply.",
+  "Say the kind thing before it becomes a thought you kept.",
+  "Show up on time — presence is respect.",
+  "Ask \u201Chow can I support you?\u201D and mean it.",
+  "Repair quickly after conflict; pride costs connection.",
+  "Be the same man in private that you are in public.",
+  "Protect her peace and your own.",
+  "Small consistent gestures beat grand rare ones."
+];
+const PL_TIPS = [
+  {lbl:"\uD83C\uDF31 Daily Growth",       tone:"b", key:"growthIdx", list:PL_GROWTH},
+  {lbl:"\uD83D\uDEE1\uFE0F Self-Love & Care", tone:"o", key:"careIdx",   list:PL_CARE},
+  {lbl:"\u2764\uFE0F Relationship Advice", tone:"b", key:"relIdx",    list:PL_REL}
+];
+function plPickForDate(iso, len){
+  const d = new Date(iso+"T12:00:00");
+  const start = new Date(d.getFullYear(),0,0);
+  const doy = Math.floor((d - start) / 86400000);
+  return doy % len;
+}
+function plRenderTips(){
+  const wrap = document.getElementById("pl-tips");
+  if(!wrap) return;
+  wrap.innerHTML = "";
+  const iso = document.getElementById("pl-datepick").value;
+  PL_TIPS.forEach(tp=>{
+    let idx = (typeof plState[tp.key]==="number" && plState[tp.key]>=0 && plState[tp.key]<tp.list.length)
+      ? plState[tp.key] : plPickForDate(iso, tp.list.length);
+    const div = document.createElement("div");
+    div.className = "pl-tip " + tp.tone;
+    div.innerHTML =
+      '<div class="pl-tip-head"><span class="pl-tip-lbl">'+tp.lbl+'</span>'+
+      '<button class="pl-tip-shuffle" title="Shuffle">\u27F3</button></div>'+
+      '<div class="pl-tip-txt"></div>';
+    div.querySelector(".pl-tip-txt").textContent = tp.list[idx];
+    const btn = div.querySelector(".pl-tip-shuffle");
+    btn.onclick = ()=>{
+      let n; do { n = Math.floor(Math.random()*tp.list.length); } while(n===idx && tp.list.length>1);
+      plState[tp.key] = n;
+      btn.classList.add("spin");
+      setTimeout(plRenderTips, 180);
+      setTimeout(()=>btn.classList.remove("spin"), 350);
+      plScheduleSave();
+    };
+    wrap.append(div);
+  });
+}
+
+const PL_CAL_PALETTE = ["#006BB6","#FF5910","#16A34A","#7C3AED"];
+let plCalReqToken = 0;
+function plCalSyncStatus(kind, label){
+  const el = document.getElementById("pl-cal-sync-badge");
+  if(!el) return;
+  const colors = { ok:"#16A34A", pending:"#9CA3AF", err:"#DC2626" };
+  el.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:'+(colors[kind]||colors.pending)+';display:inline-block"></span> Google · '+label;
+}
+async function plRenderCalendar(){
+  const wrap = document.getElementById("pl-cal-list");
+  if(!wrap) return;
+  const iso = document.getElementById("pl-datepick").value;
+  const cnt = document.getElementById("pl-cal-count");
+  const myToken = ++plCalReqToken;
+  plCalSyncStatus('pending','Syncing…');
+  if(cnt) cnt.textContent = "…";
+  wrap.innerHTML = '<div class="pl-cal-empty">Loading…</div>';
+  try{
+    const res = await fetch('https://planner.romeobravos.net/api/today-events?date='+encodeURIComponent(iso), {cache:'no-store'});
+    if(myToken !== plCalReqToken) return;
+    if(!res.ok) throw new Error('bad status '+res.status);
+    const data = await res.json();
+    if(myToken !== plCalReqToken) return;
+    if(data.error === 'google_not_connected'){
+      plCalSyncStatus('err','Not connected');
+      wrap.innerHTML = '<div class="pl-cal-empty">Google Calendar not connected</div>';
+      if(cnt) cnt.textContent = "—";
+      return;
+    }
+    const evs = data.events || [];
+    if(cnt) cnt.textContent = evs.length + (evs.length===1 ? " event" : " events");
+    wrap.innerHTML = "";
+    if(!evs.length){
+      wrap.innerHTML = '<div class="pl-cal-empty">No events — enjoy the open day 🌤️</div>';
+      plCalSyncStatus('ok','Synced');
+      return;
+    }
+    evs.forEach((e,i)=>{
+      const row = document.createElement("div");
+      row.className = "pl-cal-row";
+      row.innerHTML =
+        '<span class="pl-cal-time">'+e.time+'</span>'+
+        '<span class="pl-cal-dot" style="background:'+PL_CAL_PALETTE[i%PL_CAL_PALETTE.length]+'"></span>'+
+        '<span class="pl-cal-title"></span>';
+      row.querySelector(".pl-cal-title").textContent = e.title;
+      wrap.append(row);
+    });
+    plCalSyncStatus('ok','Synced');
+  }catch(e){
+    if(myToken !== plCalReqToken) return;
+    plCalSyncStatus('err','Offline');
+    wrap.innerHTML = '<div class="pl-cal-empty">Couldn\'t load calendar — try again shortly</div>';
+    if(cnt) cnt.textContent = "—";
+  }
+}
+
+// ══════════ IMPORTANT DATES TRACKER (birthdays / dates / times) ══════════
+// Shared between Command Center (#id-list-cc) and Planner (#id-list-pl).
+// Auto-refreshes on an interval so "days until" / "today" badges stay accurate.
+function lImpDates(){
+  const s = localStorage.getItem('ahub-impdates');
+  return s ? JSON.parse(s) : [];
+}
+function sImpDates(){ localStorage.setItem('ahub-impdates', JSON.stringify(impDates)); }
+let impDates = lImpDates();
+
+function idIcon(kind){ return kind==='birthday' ? '\ud83c\udf82' : kind==='time' ? '\u23f0' : '\ud83d\udccc'; }
+
+function idNextOccurrence(entry, now){
+  if(entry.kind === 'time'){
+    const [hh,mm] = entry.time.split(':').map(Number);
+    let d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0, 0);
+    if(d <= now) d = new Date(d.getTime() + 24*60*60*1000);
+    return d;
+  }
+  const [y,m,day] = entry.date.split('-').map(Number);
+  if(entry.recurring){
+    const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let d = new Date(now.getFullYear(), m-1, day, 0,0,0,0);
+    if(d < todayMid) d = new Date(now.getFullYear()+1, m-1, day, 0,0,0,0);
+    return d;
+  }
+  return new Date(y, m-1, day, 0,0,0,0);
+}
+
+function idFmtBadge(entry, d, now){
+  const oneDay = 24*60*60*1000;
+  const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dMid = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.round((dMid - todayMid)/oneDay);
+  if(entry.kind === 'time'){
+    if(diffDays === 0){
+      let hh=d.getHours(), mm=d.getMinutes(); const ap=hh<12?'AM':'PM'; hh=hh%12||12;
+      return hh+':'+String(mm).padStart(2,'0')+' '+ap;
+    }
+    return 'Tomorrow';
+  }
+  if(diffDays === 0) return 'Today!';
+  if(diffDays === 1) return 'Tomorrow';
+  if(diffDays < 0) return 'Passed';
+  return 'in '+diffDays+' day'+(diffDays===1?'':'s');
+}
+
+function renderImportantDates(){
+  const now = new Date();
+  const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const rows = impDates
+    .map(e=>({ e, when: idNextOccurrence(e, now) }))
+    .filter(r => r.e.kind!=='date' || r.e.recurring || r.when >= todayMid)
+    .sort((a,b)=> a.when - b.when)
+    .slice(0,6);
+  ['cc','pl'].forEach(where=>{
+    const list = document.getElementById('id-list-'+where);
+    if(!list) return;
+    const countEl = document.getElementById('id-count-'+where);
+    if(countEl && where==='cc') countEl.textContent = impDates.length + (impDates.length===1?' tracked':' tracked');
+    list.innerHTML = '';
+    if(!rows.length){
+      list.innerHTML = '<div class="id-empty">No important dates yet \u2014 tap "+ Add" to start tracking \ud83c\udf82</div>';
+      return;
+    }
+    rows.forEach(r=>{
+      const row = document.createElement('div');
+      row.className = 'id-row';
+      const dateStr = r.e.kind==='time'
+        ? 'Daily'
+        : r.when.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + (r.e.recurring?' \u00b7 yearly':'');
+      const badge = idFmtBadge(r.e, r.when, now);
+      const badgeCls = badge==='Today!' ? 'today' : (badge==='Tomorrow' || /^in [1-3] days?$/.test(badge)) ? 'soon' : '';
+      row.innerHTML =
+        '<div class="id-ic">'+idIcon(r.e.kind)+'</div>'+
+        '<div class="id-b"><div class="id-name"></div><div class="id-date">'+dateStr+'</div></div>'+
+        '<div class="id-badge '+badgeCls+'"></div>'+
+        '<button type="button" class="id-del" title="Remove">\u2715</button>';
+      row.querySelector('.id-name').textContent = r.e.name;
+      row.querySelector('.id-badge').textContent = badge;
+      row.querySelector('.id-del').onclick = ()=>{
+        impDates = impDates.filter(x=>x.id!==r.e.id);
+        sImpDates(); renderImportantDates();
+        if(typeof showToast==='function') showToast('Removed');
+      };
+      list.append(row);
+    });
+  });
+}
+
+function idToggleForm(where){
+  const form = document.getElementById('id-form-'+where);
+  if(!form) return;
+  if(form.classList.contains('open')){ form.classList.remove('open'); form.style.display='none'; form.innerHTML=''; return; }
+  form.classList.add('open'); form.style.display='flex';
+  form.innerHTML =
+    '<input type="text" placeholder="Name (e.g. Broly, Mom\'s Birthday)" class="id-f-name">'+
+    '<div class="id-form-row">'+
+      '<select class="id-f-kind">'+
+        '<option value="birthday">\ud83c\udf82 Birthday</option>'+
+        '<option value="date">\ud83d\udccc Important Date</option>'+
+        '<option value="time">\u23f0 Important Time</option>'+
+      '</select>'+
+      '<input type="date" class="id-f-date">'+
+      '<input type="time" class="id-f-time" style="display:none">'+
+    '</div>'+
+    '<div class="id-form-actions">'+
+      '<button type="button" class="id-form-cancel">Cancel</button>'+
+      '<button type="button" class="id-form-save">Save</button>'+
+    '</div>';
+  const kindSel = form.querySelector('.id-f-kind');
+  const dateInp = form.querySelector('.id-f-date');
+  const timeInp = form.querySelector('.id-f-time');
+  kindSel.onchange = ()=>{
+    const isTime = kindSel.value==='time';
+    dateInp.style.display = isTime ? 'none' : '';
+    timeInp.style.display = isTime ? '' : 'none';
+  };
+  form.querySelector('.id-form-cancel').onclick = ()=>{ form.classList.remove('open'); form.style.display='none'; form.innerHTML=''; };
+  form.querySelector('.id-form-save').onclick = ()=>{
+    const name = form.querySelector('.id-f-name').value.trim();
+    const kind = kindSel.value;
+    if(!name){ if(typeof showToast==='function') showToast('Add a name first'); return; }
+    if(kind==='time' && !timeInp.value){ if(typeof showToast==='function') showToast('Pick a time'); return; }
+    if(kind!=='time' && !dateInp.value){ if(typeof showToast==='function') showToast('Pick a date'); return; }
+    impDates.push({
+      id: 'id'+Date.now()+Math.random().toString(36).slice(2,7),
+      name, kind,
+      date: kind!=='time' ? dateInp.value : '',
+      time: kind==='time' ? timeInp.value : '',
+      recurring: kind==='birthday'
+    });
+    sImpDates();
+    form.classList.remove('open'); form.style.display='none'; form.innerHTML='';
+    renderImportantDates();
+    if(typeof showToast==='function') showToast('\ud83c\udf82 Added');
+  };
+}
+
+renderImportantDates();
+setInterval(renderImportantDates, 25*60*1000); // keep birthdays/dates/times fresh every 25 min
 
 // ══════════ AGREEMENTS TICKER ══════════
 (function(){
