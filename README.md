@@ -123,17 +123,6 @@ exists for them, so they were left rather than faked:
 
 They need Gmail/Drive endpoints on the Express service before they can tell the truth.
 
-## Known stale — not wired to anything
-
-These Command Center cards are still hardcoded. They are Gmail/Drive data and no endpoint
-exists for them, so they were left rather than faked:
-
-- **Inbox Triage** — five fixed emails, "40 unread" is a literal
-- **Recent Files** — seven fixed filenames with invented dates
-- **Tasks & Projects** — eight fixed Notion hubs with invented "updated" dates
-
-They need Gmail/Drive endpoints on the Express service before they can tell the truth.
-
 ## Local development
 
 No build, no dependencies. It needs to be served over `http://` (not `file://`), and the
