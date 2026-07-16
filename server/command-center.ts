@@ -22,14 +22,28 @@ export const commandCenterRouter = Router();
 
 const ALLOWED_ORIGIN = "https://romeobravos.net";
 
-// Data source ids (not database ids) — this workspace is on the data-source API,
-// matching notion/client.ts's dataSources.query usage.
-const DS = {
-  importantDates: "7f0b1542-d1c2-4e87-812a-58f31c170367",
-  contentPipeline: "15938264-7756-475e-bf5c-b21fcb531f3a",
-  leadPipeline: "5c2d8f56-66bc-4a13-b056-23137a41057b",
-  clientAccounts: "db8c777b-62e3-42be-a4c6-7f9817c5600f",
-  caseStudies: "cd57f408-f43d-470e-a2ab-14d5259d1ec9",
+/**
+ * Database ids, queried via databases.query.
+ *
+ * NOT dataSources.query — despite notion/client.ts using it. @notionhq/client is
+ * pinned to ^2.2.15 (2.3.0 installed), where `client.dataSources` is undefined;
+ * that API only exists in v5+. The `(notion as any)` cast in client.ts hides the
+ * type error, so those calls throw at runtime. Verified against the live token:
+ * dataSources.query -> "Cannot read properties of undefined", while
+ * databases.query returns all 19 Important Dates rows.
+ *
+ * The Revenue ids below currently return object_not_found: the OAuth integration
+ * ("Master Planner") is shared with the Master Planner page tree, not with the
+ * DPowellTC — Revenue Command Center tree. Share that page with the integration
+ * in Notion to light them up; until then getRevenue() reports them as
+ * unreadable and the hub hides the card rather than showing zeros.
+ */
+const DB = {
+  importantDates: "bc4dc23d-42a9-4e96-a09f-3f5635ec9ad2",
+  contentPipeline: "06a3feb9-d8f1-4942-880e-e07a93945c4d",
+  leadPipeline: "ad597dfe-b497-4894-a7d8-8fabfcab4a5c",
+  clientAccounts: "15db944d-bdcc-4fe0-9872-21a0af794144",
+  caseStudies: "b77f764e-117a-479c-a667-069bda16995b",
 };
 
 const TYPE_TO_KIND: Record<string, { kind: string; recurring: boolean }> = {
@@ -44,13 +58,13 @@ function richTextToPlain(rt: any[] | undefined): string {
   return (rt || []).map((t: any) => t.plain_text as string).join("");
 }
 
-async function queryAll(dataSourceId: string): Promise<any[]> {
+async function queryAll(databaseId: string): Promise<any[]> {
   const notion = getNotionClient();
   const out: any[] = [];
   let cursor: string | undefined;
   do {
-    const res: any = await (notion as any).dataSources.query({
-      data_source_id: dataSourceId,
+    const res: any = await notion.databases.query({
+      database_id: databaseId,
       start_cursor: cursor,
       page_size: 100,
     });
@@ -58,6 +72,15 @@ async function queryAll(dataSourceId: string): Promise<any[]> {
     cursor = res.next_cursor ?? undefined;
   } while (cursor);
   return out;
+}
+
+/** null means "couldn't read it" — distinct from an empty database. */
+async function tryQueryAll(databaseId: string): Promise<any[] | null> {
+  try {
+    return await queryAll(databaseId);
+  } catch {
+    return null;
+  }
 }
 
 async function listChildren(notion: any, blockId: string): Promise<any[]> {
@@ -76,7 +99,7 @@ async function listChildren(notion: any, blockId: string): Promise<any[]> {
 }
 
 async function getImportantDates(): Promise<any[]> {
-  const rows = await queryAll(DS.importantDates);
+  const rows = await queryAll(DB.importantDates);
   return rows
     .map((p: any) => {
       const props = p.properties || {};
@@ -140,41 +163,45 @@ async function getPriorities(): Promise<any[]> {
   return prios;
 }
 
-/** Aggregate counts only — see the PRIVACY note at the top of this file. */
+/**
+ * Aggregate counts only — see the PRIVACY note at the top of this file.
+ *
+ * Returns null when nothing is readable, and omits any individual database the
+ * token cannot see. An unreadable database must never be reported as 0: that
+ * reads as "no leads" when it means "no access", which is worse than saying
+ * nothing at all.
+ */
 async function getRevenue(): Promise<any> {
   const countOf = async (id: string): Promise<number | null> => {
-    try {
-      return (await queryAll(id)).length;
-    } catch {
-      return null;
-    }
+    const rows = await tryQueryAll(id);
+    return rows === null ? null : rows.length;
   };
 
-  const content = await queryAll(DS.contentPipeline).catch(() => [] as any[]);
-  const byStatus: Record<string, number> = {};
-  for (const p of content) {
-    const s = p.properties?.Status?.select?.name || "Unknown";
-    byStatus[s] = (byStatus[s] || 0) + 1;
-  }
-
-  const [leads, clients, cases] = await Promise.all([
-    countOf(DS.leadPipeline),
-    countOf(DS.clientAccounts),
-    countOf(DS.caseStudies),
+  const [content, cases, leads, clients] = await Promise.all([
+    tryQueryAll(DB.contentPipeline),
+    countOf(DB.caseStudies),
+    countOf(DB.leadPipeline),
+    countOf(DB.clientAccounts),
   ]);
 
-  return {
-    contentQueue: content.length,
-    byStatus,
-    rows: [
-      { label: "Content queue", value: String(content.length) },
-      { label: "Scripted & dated", value: String(byStatus["Scripted"] || 0) },
-      { label: "Published", value: String(byStatus["Published"] || 0) },
-      { label: "Case studies", value: String(cases ?? 0) },
-      { label: "Leads in pipeline", value: String(leads ?? 0) },
-      { label: "Client accounts", value: String(clients ?? 0) },
-    ],
-  };
+  const rows: Array<{ label: string; value: string }> = [];
+  let byStatus: Record<string, number> = {};
+
+  if (content !== null) {
+    for (const p of content) {
+      const s = p.properties?.Status?.select?.name || "Unknown";
+      byStatus[s] = (byStatus[s] || 0) + 1;
+    }
+    rows.push({ label: "Content queue", value: String(content.length) });
+    rows.push({ label: "Scripted & dated", value: String(byStatus["Scripted"] || 0) });
+    rows.push({ label: "Published", value: String(byStatus["Published"] || 0) });
+  }
+  if (cases !== null) rows.push({ label: "Case studies", value: String(cases) });
+  if (leads !== null) rows.push({ label: "Leads in pipeline", value: String(leads) });
+  if (clients !== null) rows.push({ label: "Client accounts", value: String(clients) });
+
+  if (!rows.length) return null; // nothing shared with the integration — hub hides the card
+  return { contentQueue: content === null ? null : content.length, byStatus, rows };
 }
 
 const CACHE_MS = 60_000;
