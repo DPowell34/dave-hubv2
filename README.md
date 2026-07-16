@@ -66,6 +66,7 @@ visible, and re-syncs on wake if the data is older than 5 minutes.
 | `GET /api/schedule-merge` | **live** | Two-way Notion ↔ Google merge; `?apply=1` writes, self-runs every 15 min |
 | `GET /api/sync-birthdays` | **live** | Google contact birthdays → Important Dates; `?apply=1` writes, daily |
 | `GET /api/daily` | **live** | Today's checklists + End of Day Review (read-only) |
+| `GET /api/categories` | **live** | The seven Browse category databases (read-only) |
 
 ## Why nothing writes *from* the page
 
@@ -74,10 +75,24 @@ Every write in this system is **server-initiated** (a timer inside the box) or a
 **romeobravos.net has no auth, and CORS restrains browsers, not `curl`.** A public write
 endpoint would let anyone tick Dave's checklist or write into his Master Planner.
 
-That's why `/api/daily` is read-only and Notion is the source of truth for checklists and
-the review: the hub's checkbox state lives in `localStorage` on the phone, so genuine
-two-way would require the page to push. Revisit if the site ever gets authentication —
-that same change would also unlock the Revenue counts.
+That's why `/api/daily` and `/api/categories` are read-only and Notion is the source of
+truth for checklists, the review, and Browse entries: all of that state lives in
+`localStorage` on the phone, so genuine two-way would require the page to push. Revisit if
+the site ever gets authentication — that same change would also unlock the Revenue counts.
+
+### Browse entry matching
+
+`/api/categories` maps the seven databases into the shape Browse already uses, normalising
+each category's Notion `Status` (Want to Go/Booked/Visited, Want to Watch/Watching/Watched,
+…) to the app's internal `want|prog|done`.
+
+The client matches on **type + lowercase title** — the same key the app's own duplicate
+check uses. This is load-bearing: the Notion databases were seeded from the app's 15 SEED
+places, so any other key renders every default twice. Verified on a wiped device: 15 in,
+15 out, zero duplicates, all adopting their Notion ids.
+
+Nothing is deleted locally — a row absent from Notion may simply be app-only. Databases are
+queried sequentially; seven at once would blow the shared ~3 req/sec Notion budget.
 
 ## The schedule merge
 
