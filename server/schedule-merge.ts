@@ -179,7 +179,6 @@ async function listChildren(notion: any, blockId: string): Promise<any[]> {
   return out;
 }
 
-/** Finds today's "Today's Schedule" table block, mirroring routes/schedule.ts. */
 async function findScheduleTable(notion: any, blocks: any[]): Promise<any | null> {
   let sawHeading = false;
   for (const b of blocks) {
@@ -197,6 +196,28 @@ async function findScheduleTable(notion: any, blocks: any[]): Promise<any | null
     }
   }
   return null;
+}
+
+/**
+ * Today's schedule table — the one under the "Thursday, July 16, 2026" heading.
+ *
+ * Scoping to that heading first is essential, and matches routes/schedule.ts.
+ * The page holds TWO "Today's Schedule" tables: the blank reusable one inside
+ * the Daily Planner toggle, which appears FIRST, and the real one under today's
+ * date heading. Searching the page from the top finds the template and writes
+ * today's one-off events into the blank Dave copies for every new day.
+ * (Learned the hard way — it did exactly that on 2026-07-16.)
+ */
+async function findTodayScheduleTable(notion: any, pageId: string): Promise<any | null> {
+  const heading = new Date().toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric", timeZone: TZ,
+  });
+  const top = await listChildren(notion, pageId);
+  const idx = top.findIndex(
+    (b: any) => b.type === "heading_1" && richTextToPlain(b.heading_1?.rich_text).trim() === heading
+  );
+  if (idx === -1) return null; // no section for today — write nothing rather than guess
+  return findScheduleTable(notion, top.slice(idx + 1));
 }
 
 scheduleMergeRouter.get("/api/schedule-merge", async (req, res) => {
@@ -289,9 +310,10 @@ scheduleMergeRouter.get("/api/schedule-merge", async (req, res) => {
     // --- write: Google -> Notion (append to the hour's Activity cell) ---
     const updated: string[] = [];
     if (toNotion.length) {
-      const table = await findScheduleTable(notion, await listChildren(notion, pageId));
+      const table = await findTodayScheduleTable(notion, pageId);
       if (!table) {
-        report.notionWriteError = "Today's Schedule table not found — no Notion rows written";
+        report.notionWriteError =
+          "No table found under today's date heading — nothing written (refusing to fall back to the blank template)";
       } else {
         const rows = await listChildren(notion, table.id);
         for (const i of toNotion) {
