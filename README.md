@@ -82,8 +82,9 @@ follows from that:
 - **Server-initiated writes** (`schedule-merge`, `sync-birthdays`) run on timers inside the
   box. Nothing external can trigger data injection; the worst a stranger can do by hitting
   `?apply=1` is make an idempotent, additive merge run early.
-- **Writes from the page** (`POST /api/categories`) require `HUB_WRITE_KEY` — see the
-  bottom of this file. The key is user-supplied, per device, and never in the page.
+- **Writes from the page** (`POST /api/categories`, `POST /api/daily`, `POST /api/important-dates`)
+  require `HUB_WRITE_KEY` — see the bottom of this file. The key is user-supplied, per device,
+  and never in the page.
 
 The **Revenue counts** remain gated on the separate Notion share, not on this.
 
