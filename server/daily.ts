@@ -271,7 +271,9 @@ function indexToday(blocks: any[]) {
   return { todos, lists, callouts, prios };
 }
 
-const rt = (s: string) => [{ type: "text", text: { content: String(s || "").slice(0, 1900) } }];
+// `as const` matters: without it `type` widens to string and the SDK's
+// RichTextItemRequest rejects it at compile time.
+const rt = (s: string) => [{ type: "text" as const, text: { content: String(s || "").slice(0, 1900) } }];
 
 /**
  * POST /api/daily { checks?, review?, priorities? }
@@ -344,8 +346,8 @@ dailyRouter.post("/api/daily", async (req, res) => {
       await notion.blocks.update({
         block_id: hit.id,
         callout: { rich_text: [
-          { type: "text", text: { content: label }, annotations: { bold: true } },
-          { type: "text", text: { content: ` — ${val}`.slice(0, 1900) } },
+          { type: "text" as const, text: { content: label }, annotations: { bold: true } },
+          { type: "text" as const, text: { content: ` — ${val}`.slice(0, 1900) } },
         ] },
       });
       changed.push(`priorities.${k}`);
