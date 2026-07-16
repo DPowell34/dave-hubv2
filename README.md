@@ -65,7 +65,9 @@ visible, and re-syncs on wake if the data is older than 5 minutes.
 | `GET /api/command-center` | **live** | Priorities, Important Dates, revenue counts |
 | `GET /api/schedule-merge` | **live** | Two-way Notion ↔ Google merge; `?apply=1` writes, self-runs every 15 min |
 | `GET /api/sync-birthdays` | **live** | Google contact birthdays → Important Dates; `?apply=1` writes, daily |
-| `GET /api/daily` | **live** | Today's checklists + End of Day Review (read-only) |
+| `GET /api/daily` | **live** | Today's checklists + End of Day Review |
+| `POST /api/daily` | **live** | Writes checklists, review, priorities; requires `HUB_WRITE_KEY` |
+| `POST /api/important-dates` | **live** | Files hub-added dates; requires `HUB_WRITE_KEY` |
 | `GET /api/categories` | **live** | The seven Browse category databases |
 | `POST /api/categories` | **live** | Upserts entries from the app; requires `HUB_WRITE_KEY` |
 
@@ -83,10 +85,25 @@ follows from that:
 - **Writes from the page** (`POST /api/categories`) require `HUB_WRITE_KEY` — see the
   bottom of this file. The key is user-supplied, per device, and never in the page.
 
-Still read-only: **`/api/daily`** (checklists + End of Day Review). Notion is the source of
-truth there — tick in Notion, not the app. The same key mechanism could extend it if wanted.
-
 The **Revenue counts** remain gated on the separate Notion share, not on this.
+
+### What still cannot match, and why
+
+Everything with a Notion counterpart now syncs both ways. These stay device-local because
+**nothing in Notion corresponds to them** — they'd need new structure inventing first:
+
+| Device state | Missing counterpart |
+|---|---|
+| Planner **focus** | no field on the page |
+| Daily **Five Agreements** ticks | the agreements are static callouts, not per-day checkboxes |
+| **TikTok saved searches** | no database |
+| **Custom categories** (Settings → + Add Category) | would need a new database per category |
+| App name / theme / win streak | device preference, arguably shouldn't sync |
+| The **write key** itself | must stay device-local by design |
+
+Also: **deletes never propagate.** Removing an entry, date or checklist item in the app
+leaves the Notion row alone. Deleting someone's data off a title match is not a risk worth
+taking; delete in Notion if you mean it.
 
 ### Browse entry matching
 
