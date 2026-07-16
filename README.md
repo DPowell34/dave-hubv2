@@ -226,3 +226,21 @@ Invariants worth not breaking:
 category. **Settings → Push Pending to Notion** sends anything added before the key was set.
 
 Rotate by editing `.env` and restarting the service; each device then re-pastes the key.
+
+## Categories always have a database
+
+`POST /api/categories/ensure` creates a Notion database for any hub category that lacks one.
+The client calls it on every Browse open and immediately after a category is created in
+Settings, so a new category is syncable at once rather than stranding its entries on one
+device. Requires `HUB_WRITE_KEY`.
+
+- **Idempotent** — a category already known is left alone, which is what makes calling it on
+  every Browse open safe.
+- The database is built from that category's **own** `subs` and status labels; a custom
+  category uses *Want to Try / In Progress / Done*, not the Places vocabulary. Status options
+  are written in want→prog→done order because the read maps them back by name.
+- **No `icon` on create**: Notion validates `icon.emoji` against a fixed enum and rejects
+  anything outside it, failing the whole create over a decoration. The title carries the emoji.
+- The type→database map is `data/category-map.json`, not SQLite — small and hand-inspectable.
+  Built-ins stay hardcoded and the registry only adds to them, so a missing or corrupt file
+  degrades to "the seven still work" rather than breaking Browse.
