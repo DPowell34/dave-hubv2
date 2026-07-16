@@ -157,3 +157,128 @@ categoriesRouter.get("/api/categories", async (_req, res) => {
     res.status(502).json({ error: "categories_unavailable", detail: String(err?.message || err).slice(0, 200) });
   }
 });
+
+/* ═══════════════ WRITE PATH ═══════════════
+   Reads above are public. Writes require HUB_WRITE_KEY, which Dave pastes into
+   the hub's Settings once per device and which lives only in that device's
+   localStorage — never in the page source. Without it this endpoint is exactly
+   the hole we avoided all along: romeobravos.net has no auth and CORS restrains
+   browsers, not curl, so an unauthenticated POST would let anyone write into the
+   workspace.
+
+   Timing-safe compare, and the service refuses to accept writes at all if the
+   key is unset — an empty env var must never mean "allow everyone". */
+
+function writeKeyOk(req: any): boolean {
+  const expected = process.env.HUB_WRITE_KEY || "";
+  if (!expected) return false; // unset => writes disabled, not open
+  const got = String(req.headers["authorization"] || "").replace(/^Bearer\s+/i, "");
+  if (!got || got.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= got.charCodeAt(i) ^ expected.charCodeAt(i);
+  return diff === 0;
+}
+
+function corsWrite(res: any) {
+  res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
+  res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Cache-Control", "no-store");
+}
+
+// A cross-origin POST carrying Authorization is preflighted; without this the
+// browser never sends the real request.
+categoriesRouter.options("/api/categories", (_req, res) => {
+  corsWrite(res);
+  res.setHeader("Access-Control-Max-Age", "600");
+  res.sendStatus(204);
+});
+
+const STATUS_TO_NOTION: Record<string, Record<string, string>> = Object.fromEntries(
+  CATS.map((c) => [c.type, Object.fromEntries(Object.entries(c.status).map(([label, k]) => [k, label]))])
+);
+const PRIORITY_TO_NOTION: Record<string, string> = { must: "Must Do", high: "High", someday: "Someday" };
+
+/** Only send properties that exist on that category's database. */
+function buildProps(c: CatDef, e: any): any {
+  const p: any = {
+    Name: { title: [{ text: { content: String(e.title || "").slice(0, 200) } }] },
+    Status: { select: { name: STATUS_TO_NOTION[c.type][e.status] || STATUS_TO_NOTION[c.type].want } },
+    Priority: { select: { name: PRIORITY_TO_NOTION[e.priority] || "High" } },
+    Favorite: { checkbox: !!e.favorite },
+  };
+  if (e.category) p["Sub-type"] = { select: { name: String(e.category) } };
+  if (typeof e.rating === "number" && e.rating > 0) p["Rating"] = { number: e.rating };
+  if (e.notes) p["Notes"] = { rich_text: [{ text: { content: String(e.notes).slice(0, 1800) } }] };
+  if (Array.isArray(e.tags) && e.tags.length) p["Tags"] = { multi_select: e.tags.slice(0, 10).map((t: string) => ({ name: String(t).slice(0, 90) })) };
+  if (e.addedDate) p["Added"] = { date: { start: String(e.addedDate).slice(0, 10) } };
+
+  for (const name of c.extra || []) {
+    const field = FIELD[name] || name.toLowerCase();
+    const v = e[field];
+    if (v === undefined || v === "" || v === null) continue;
+    if (name === "Cost") p[name] = { select: { name: String(v) } };
+    else if (name === "Event Date") p[name] = { date: { start: String(v).slice(0, 10) } };
+    else if (name === "Website") p[name] = { url: String(v) };
+    else if (name === "Pages") p[name] = { number: Number(v) || 0 };
+    else if (["Date Night", "Kid Friendly", "Indoor", "Outdoor"].includes(name)) p[name] = { checkbox: !!v };
+    else p[name] = { rich_text: [{ text: { content: String(v).slice(0, 1800) } }] };
+  }
+  return p;
+}
+
+/**
+ * POST /api/categories  { entries: [ ...hub entries... ] }
+ * Upsert by notionId when known, else by case-insensitive title within the
+ * category — the same key the read side and the app's own duplicate check use,
+ * so pushing an entry the app already matched can't fork a second row.
+ */
+categoriesRouter.post("/api/categories", async (req, res) => {
+  corsWrite(res);
+  if (!writeKeyOk(req)) {
+    res.status(401).json({ error: "unauthorized" });
+    return;
+  }
+  const incoming = Array.isArray(req.body?.entries) ? req.body.entries : [];
+  if (!incoming.length) {
+    res.json({ ok: true, created: [], updated: [], skipped: [] });
+    return;
+  }
+
+  const notion = getNotionClient();
+  const created: string[] = [], updated: string[] = [], skipped: string[] = [];
+
+  try {
+    // Cache existing titles per touched database so we can match by title.
+    const existing: Record<string, Map<string, string>> = {};
+    for (const e of incoming.slice(0, 50)) {
+      const c = CATS.find((x) => x.type === e.type);
+      const title = String(e.title || "").trim();
+      if (!c || !title) { skipped.push(`${e.type}/${title || "(untitled)"}: unknown category`); continue; }
+
+      if (!existing[c.type]) {
+        const m = new Map<string, string>();
+        for (const p of await queryAll(notion, c.db)) {
+          const t = readProp(p.properties?.["Name"]);
+          if (t) m.set(String(t).trim().toLowerCase(), p.id);
+        }
+        existing[c.type] = m;
+      }
+
+      const pageId = e.notionId || existing[c.type].get(title.toLowerCase());
+      const props = buildProps(c, e);
+      if (pageId) {
+        await notion.pages.update({ page_id: pageId, properties: props });
+        updated.push(`${c.type}/${title}`);
+      } else {
+        const r: any = await notion.pages.create({ parent: { database_id: c.db }, properties: props });
+        existing[c.type].set(title.toLowerCase(), r.id);
+        created.push(`${c.type}/${title}`);
+      }
+    }
+    cache = { at: 0, body: null }; // next read must reflect what we just wrote
+    res.json({ ok: true, created, updated, skipped });
+  } catch (err: any) {
+    res.status(502).json({ error: "write_failed", detail: String(err?.message || err).slice(0, 300), created, updated });
+  }
+});

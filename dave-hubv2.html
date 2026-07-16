@@ -1341,6 +1341,28 @@ html,body{
         <div class="sr" onclick="editVal('appName','App name',cfg.appName)"><div class="sr-ico">✏️</div><div class="sr-info"><div class="sr-lbl">App Name</div><div class="sr-sub" id="sr-an"></div></div><div class="sr-r">›</div></div>
         <div class="sr" onclick="editVal('userName','Your name',cfg.userName)"><div class="sr-ico">👤</div><div class="sr-info"><div class="sr-lbl">Your Name</div><div class="sr-sub" id="sr-un"></div></div><div class="sr-r">›</div></div>
       </div>
+      <div class="sec-lbl" style="margin-bottom:8px">Notion Sync</div>
+      <div class="ss">
+        <div class="sr" onclick="editWriteKey()">
+          <div class="sr-ico">🔑</div>
+          <div class="sr-info">
+            <div class="sr-lbl">Notion Write Key</div>
+            <div class="sr-sub" id="sr-wk">Not set — entries stay on this device</div>
+          </div>
+          <div class="sr-r">›</div>
+        </div>
+        <div class="sr" onclick="pushAllLocalOnly()">
+          <div class="sr-ico">⬆️</div>
+          <div class="sr-info">
+            <div class="sr-lbl">Push Pending to Notion</div>
+            <div class="sr-sub" id="sr-pending">—</div>
+          </div>
+          <div class="sr-r">›</div>
+        </div>
+      </div>
+      <div class="sr-sub" style="margin:-8px 2px 16px;font-size:11px;line-height:1.5;color:var(--t3)">
+        Stored only on this device, never in the page. With it set, entries you add here are written to Notion.
+      </div>
       <div class="sec-lbl" style="margin-bottom:8px">Theme Color</div>
       <div class="ss"><div class="color-grid" id="color-grid"></div></div>
       <div class="sec-lbl" style="margin-bottom:8px">Categories</div>
@@ -2136,6 +2158,7 @@ function advStatus(id){
   else if(e.status==='want'){e.status='prog';}
   else{e.status='done';}
   sEntries();
+  pushEntry(e);
   showToast(e.status==='done'?'✅ '+c.sl.done:'▶️ '+c.sl[e.status]);
   document.getElementById('det-ov').classList.remove('open');
   refreshView();
@@ -2143,12 +2166,13 @@ function advStatus(id){
 
 function setRating(id,r){
   const e=entries.find(x=>x.id===id);if(!e)return;
-  e.rating=r;sEntries();openDetail(id);showToast('⭐ Rated '+r+'/5');
+  e.rating=r;sEntries();pushEntry(e);openDetail(id);showToast('⭐ Rated '+r+'/5');
 }
 
 function toggleFav(id){
   const e=entries.find(x=>x.id===id);if(!e)return;
   e.favorite=!e.favorite;sEntries();
+  pushEntry(e);
   showToast(e.favorite?'❤️ Saved!':'Removed');
   refreshView();
 }
@@ -2200,6 +2224,77 @@ const CAT_SYNC_MS = 5*60*1000;
 let _catSyncing = false;
 
 function catKey(e){ return String(e.type||'')+'|'+String(e.title||'').trim().toLowerCase(); }
+
+/* ── write key ──
+   Lives only in this device's localStorage and is sent as a bearer token.
+   Deliberately never embedded in the page: the page is public, so a baked-in
+   secret would protect nothing. */
+function wkGet(){ return localStorage.getItem('ahub-writekey') || ''; }
+function wkSet(v){ v ? localStorage.setItem('ahub-writekey', v) : localStorage.removeItem('ahub-writekey'); }
+
+function renderWriteKey(){
+  const el = document.getElementById('sr-wk');
+  if(el) el.textContent = wkGet() ? '••••••••  set on this device' : 'Not set — entries stay on this device';
+}
+
+async function editWriteKey(){
+  const cur = wkGet();
+  const v = prompt('Notion write key\n\nPaste the key to let this device write entries to Notion.\nLeave blank to clear it.', cur);
+  if(v === null) return;
+  const key = v.trim();
+  wkSet(key);
+  renderWriteKey();
+  if(!key){ showToast('🔒 Write key cleared'); return; }
+  showToast('⏳ Checking key…');
+  const ok = await pushEntriesToNotion([], true);
+  showToast(ok ? '✅ Key accepted — this device can write' : '❌ Key rejected — check and re-paste');
+}
+
+/**
+ * Push entries to Notion. Returns true on success.
+ * Called only from user actions — never from syncNotionCategories, or a pull
+ * would immediately echo back as a push.
+ */
+async function pushEntriesToNotion(list, quiet){
+  const key = wkGet();
+  if(!key) return false;
+  try{
+    const res = await fetch('https://planner.romeobravos.net/api/categories', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+key },
+      body: JSON.stringify({entries:(list||[]).map(e=>({
+        notionId:e.notionId, type:e.type, title:e.title, category:e.category,
+        status:e.status, priority:e.priority, favorite:!!e.favorite, rating:e.rating||0,
+        tags:e.tags||[], notes:e.notes||'', addedDate:e.addedDate,
+        city:e.city, address:e.address, website:e.website, cost:e.cost,
+        dateNight:e.dateNight, kidFriendly:e.kidFriendly, indoor:e.indoor, outdoor:e.outdoor,
+        author:e.author, pages:e.pages, platform:e.platform, genre:e.genre,
+        eventDate:e.eventDate, venue:e.venue
+      }))})
+    });
+    if(res.status === 401){ if(!quiet) showToast('🔑 Write key rejected'); return false; }
+    if(!res.ok){ if(!quiet) showToast('⚠️ Notion write failed'); return false; }
+    const data = await res.json();
+    if(!quiet && (data.created||[]).length) showToast('✅ Saved to Notion');
+    return true;
+  }catch(_){ if(!quiet) showToast('⚠️ Offline — saved on device only'); return false; }
+}
+
+/** Fire-and-forget push for a single entry after a user edit. */
+function pushEntry(e){
+  if(!e || !wkGet()) return;
+  pushEntriesToNotion([e]).then(ok=>{ if(ok) setTimeout(syncNotionCategories, 1500); });
+}
+
+/** Anything added on this device before the key was set is still local-only. */
+async function pushAllLocalOnly(){
+  if(!wkGet()){ showToast('🔑 Set a write key first'); return; }
+  const pending = entries.filter(e=>!e.notionId);
+  if(!pending.length){ showToast('✅ Nothing pending — all entries are in Notion'); return; }
+  showToast('⏳ Pushing '+pending.length+' entr'+(pending.length===1?'y':'ies')+'…');
+  const ok = await pushEntriesToNotion(pending);
+  if(ok){ showToast('✅ Pushed '+pending.length+' to Notion'); setTimeout(syncNotionCategories, 1500); }
+}
 
 async function syncNotionCategories(){
   if(_catSyncing) return;
@@ -2416,21 +2511,31 @@ function saveEntry(){
     tags:[...fTags],favorite:gc('tc-fav'),
     dateNight:gc('tc-dn'),kidFriendly:gc('tc-kid'),indoor:gc('tc-in'),outdoor:gc('tc-out'),
   };
+  let saved;
   if(editId){
     const idx=entries.findIndex(e=>e.id===editId);
-    entries[idx]={...entries[idx],...d};
+    if(idx > -1){
+      entries[idx]={...entries[idx],...d};
+      saved = entries[idx];
+    }
     showToast('💾 Saved!');
   } else {
-    entries.unshift({id:Date.now(),addedDate:new Date().toISOString().split('T')[0],rating:0,...d});
+    saved = {id:Date.now(),addedDate:new Date().toISOString().split('T')[0],rating:0,...d};
+    entries.unshift(saved);
     showToast('✨ Added!');
   }
   sEntries();closeForm();refreshView();
+  if(saved) pushEntry(saved);
 }
 
 // ═══════ SETTINGS ═══════
 function renderSettings(){
   document.getElementById('sr-an').textContent=cfg.appName;
   document.getElementById('sr-un').textContent=cfg.userName;
+  renderWriteKey();
+  const pend = entries.filter(e=>!e.notionId).length;
+  const pe = document.getElementById('sr-pending');
+  if(pe) pe.textContent = pend ? pend+' entr'+(pend===1?'y':'ies')+' only on this device' : 'All entries are in Notion';
   document.getElementById('color-grid').innerHTML=THEMES.map((t,i)=>
     `<div class="csw ${cfg.themeIdx===i?'on':''}" style="background:linear-gradient(135deg,${t.a},${t.b})" onclick="setTheme(${i})" title="${t.l}"></div>`
   ).join('');
