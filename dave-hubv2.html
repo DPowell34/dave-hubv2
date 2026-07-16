@@ -1835,7 +1835,7 @@ function goScreen(s,btn){
   if(btn) btn.classList.add('active');
   else if(niMap[s]) document.getElementById(niMap[s])&&document.getElementById(niMap[s]).classList.add('active');
   if(s==='home'){renderHome();document.getElementById('ni-home').classList.add('active');}
-  if(s==='browse'){ renderBrowse(); syncNotionCategories(); }
+  if(s==='browse'){ renderBrowse(); ensureCategoryDbs(true).then(()=>syncNotionCategories()); }
   if(s==='search'){renderTypeChips();doSearch();}
   if(s==='settings') renderSettings();
   if(s==='planner') renderPlanner();
@@ -2286,6 +2286,29 @@ function pushEntry(e){
   pushEntriesToNotion([e]).then(ok=>{ if(ok) setTimeout(syncNotionCategories, 1500); });
 }
 
+/**
+ * Ask the server to create a Notion database for any category that lacks one.
+ *
+ * Idempotent, so it's safe on every Browse open: categories that already have a
+ * database are left alone. Without this, a category added in Settings has
+ * nowhere in Notion to put its entries, and the two silently drift apart.
+ */
+async function ensureCategoryDbs(quiet){
+  if(!wkGet()) return null;
+  try{
+    const res = await fetch('https://planner.romeobravos.net/api/categories/ensure', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+wkGet()},
+      body: JSON.stringify({cats: cats.map(c=>({id:c.id, name:c.name, icon:c.icon, subs:c.subs, sl:c.sl}))})
+    });
+    if(!res.ok) return null;
+    const j = await res.json();
+    if(!quiet && (j.created||[]).length) showToast('🗂️ Created '+j.created.length+' Notion database'+(j.created.length===1?'':'s'));
+    if((j.created||[]).length) setTimeout(syncNotionCategories, 1500);
+    return j;
+  }catch(_){ return null; }
+}
+
 /** Anything added on this device before the key was set is still local-only. */
 async function pushAllLocalOnly(){
   if(!wkGet()){ showToast('🔑 Set a write key first'); return; }
@@ -2578,6 +2601,8 @@ function saveNewCat(){
   cats.push({id:'c_'+Date.now(),name,icon:ncIcon,ca:t.a,cb:t.b,subs:['Option 1','Option 2','Other'],sl:{want:'Want to Try',prog:'In Progress',done:'Done'},ef:[]});
   sCats();document.getElementById('addcat-ov').classList.remove('open');
   showToast('✅ Category added!');renderSettings();renderHome();
+  // Give it a Notion database immediately, or its entries would strand here.
+  ensureCategoryDbs();
 }
 
 // ═══════ CSV ═══════

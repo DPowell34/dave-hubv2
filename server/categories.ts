@@ -1,5 +1,8 @@
 import { Router } from "express";
+import * as fs from "fs";
+import * as path from "path";
 import { getNotionClient } from "../notion/client";
+import { config } from "../config";
 
 /**
  * GET /api/categories — the seven Browse category databases under Master
@@ -29,7 +32,39 @@ interface CatDef {
   extra?: string[];                   // per-category fields worth carrying
 }
 
-const CATS: CatDef[] = [
+/**
+ * Categories added in the hub's Settings have no database, so their entries
+ * could never reach Notion — the app and Notion would silently drift apart the
+ * moment one was created. POST /api/categories/ensure creates a database for any
+ * category that lacks one and records it here.
+ *
+ * A JSON file rather than db.ts's SQLite: this is a small, hand-inspectable map
+ * and adding a table to the sync worker's schema for it would be heavier than
+ * the problem deserves.
+ */
+const REGISTRY = path.join(__dirname, "..", "..", "data", "category-map.json");
+
+function loadRegistry(): CatDef[] {
+  try {
+    const raw = fs.readFileSync(REGISTRY, "utf8");
+    const j = JSON.parse(raw);
+    return Array.isArray(j) ? j : [];
+  } catch {
+    return []; // absent on first run
+  }
+}
+function saveRegistry(list: CatDef[]) {
+  fs.mkdirSync(path.dirname(REGISTRY), { recursive: true });
+  fs.writeFileSync(REGISTRY, JSON.stringify(list, null, 2), "utf8");
+}
+
+/** Built-ins plus anything created for a custom category. */
+function allCats(): CatDef[] {
+  const extra = loadRegistry().filter((r) => !DEFAULT_CATS.some((d) => d.type === r.type));
+  return [...DEFAULT_CATS, ...extra];
+}
+
+const DEFAULT_CATS: CatDef[] = [
   { type: "place",    db: "112e8351-ae09-4205-a58f-a9a2307fc4a4",
     status: { "Want to Go": "want", Booked: "prog", Visited: "done" },
     extra: ["City", "Address", "Website", "Cost", "Date Night", "Kid Friendly", "Indoor", "Outdoor"] },
@@ -102,7 +137,7 @@ async function build() {
 
   // Sequential: seven databases at once would blow the shared ~3 req/sec budget
   // and take today-schedule down with it, which is exactly what happened before.
-  for (const c of CATS) {
+  for (const c of allCats()) {
     let rows: any[];
     try {
       rows = await queryAll(notion, c.db);
@@ -193,17 +228,109 @@ categoriesRouter.options("/api/categories", (_req, res) => {
   res.setHeader("Access-Control-Max-Age", "600");
   res.sendStatus(204);
 });
+categoriesRouter.options("/api/categories/ensure", (_req, res) => {
+  corsWrite(res);
+  res.setHeader("Access-Control-Max-Age", "600");
+  res.sendStatus(204);
+});
 
-const STATUS_TO_NOTION: Record<string, Record<string, string>> = Object.fromEntries(
-  CATS.map((c) => [c.type, Object.fromEntries(Object.entries(c.status).map(([label, k]) => [k, label]))])
-);
+const SELECT_COLORS = ["blue", "purple", "green", "orange", "pink", "brown", "yellow", "red", "gray", "default"];
+
+/**
+ * POST /api/categories/ensure { cats: [ {id,name,icon,subs,sl} ] }
+ *
+ * Creates a Notion database for any hub category that doesn't have one, so a
+ * category added in Settings is immediately syncable instead of silently
+ * stranding its entries on one device.
+ *
+ * Idempotent: a category already in DEFAULT_CATS or the registry is left alone,
+ * so this is safe to call on every app start.
+ */
+categoriesRouter.post("/api/categories/ensure", async (req, res) => {
+  corsWrite(res);
+  if (!writeKeyOk(req)) { res.status(401).json({ error: "unauthorized" }); return; }
+
+  const pageId = config.notion.masterPlannerPageId;
+  if (!pageId) { res.status(500).json({ error: "master planner page not configured" }); return; }
+
+  const incoming = Array.isArray(req.body?.cats) ? req.body.cats.slice(0, 30) : [];
+  if (!incoming.length) { res.json({ ok: true, created: [], existing: allCats().map((c) => c.type) }); return; }
+
+  try {
+    const notion = getNotionClient();
+    const registry = loadRegistry();
+    const known = new Set(allCats().map((c) => c.type));
+    const created: string[] = [];
+
+    for (const cat of incoming) {
+      const type = String(cat.id || "").trim();
+      const name = String(cat.name || "").trim();
+      if (!type || !name || known.has(type)) continue;
+
+      const subs: string[] = Array.isArray(cat.subs) && cat.subs.length ? cat.subs.slice(0, 25) : ["Other"];
+      const sl = cat.sl || {};
+      const want = String(sl.want || "Want to Try");
+      const prog = String(sl.prog || "In Progress");
+      const done = String(sl.done || "Done");
+      const icon = String(cat.icon || "🗂️");
+
+      const db: any = await notion.databases.create({
+        parent: { type: "page_id", page_id: pageId },
+        icon: { type: "emoji", emoji: icon } as any,
+        title: [{ type: "text", text: { content: `${icon} ${name}` } }],
+        description: [{ type: "text", text: { content: `Dave's Hub — ${name} category. Mirrors Browse › ${name} on romeobravos.net.` } }],
+        properties: {
+          Name: { title: {} },
+          "Sub-type": { select: { options: subs.map((s, i) => ({ name: String(s).slice(0, 90), color: SELECT_COLORS[i % SELECT_COLORS.length] as any })) } },
+          // Order matters: the read maps these labels back to want/prog/done.
+          Status: { select: { options: [
+            { name: want, color: "gray" as any },
+            { name: prog, color: "orange" as any },
+            { name: done, color: "green" as any },
+          ] } },
+          Priority: { select: { options: [
+            { name: "Must Do", color: "red" as any },
+            { name: "High", color: "orange" as any },
+            { name: "Someday", color: "gray" as any },
+          ] } },
+          Favorite: { checkbox: {} },
+          Rating: { number: {} },
+          Tags: { multi_select: { options: [] } },
+          Notes: { rich_text: {} },
+          Added: { date: {} },
+          Website: { url: {} },
+        },
+      });
+
+      registry.push({ type, db: db.id, status: { [want]: "want", [prog]: "prog", [done]: "done" }, extra: ["Website"] });
+      known.add(type);
+      created.push(`${name} -> ${db.id}`);
+    }
+
+    if (created.length) {
+      saveRegistry(registry);
+      cache = { at: 0, body: null }; // a new database must show up on the next read
+    }
+    res.json({ ok: true, created, existing: allCats().map((c) => c.type) });
+  } catch (err: any) {
+    res.status(502).json({ error: "ensure_failed", detail: String(err?.message || err).slice(0, 300) });
+  }
+});
+
+// Rebuilt per call, not cached at module load: a category created after boot
+// must be usable immediately.
+function statusToNotion(): Record<string, Record<string, string>> {
+  return Object.fromEntries(
+    allCats().map((c) => [c.type, Object.fromEntries(Object.entries(c.status).map(([label, k]) => [k, label]))])
+  );
+}
 const PRIORITY_TO_NOTION: Record<string, string> = { must: "Must Do", high: "High", someday: "Someday" };
 
 /** Only send properties that exist on that category's database. */
 function buildProps(c: CatDef, e: any): any {
   const p: any = {
     Name: { title: [{ text: { content: String(e.title || "").slice(0, 200) } }] },
-    Status: { select: { name: STATUS_TO_NOTION[c.type][e.status] || STATUS_TO_NOTION[c.type].want } },
+    Status: { select: { name: (statusToNotion()[c.type] || {})[e.status] || (statusToNotion()[c.type] || {}).want } },
     Priority: { select: { name: PRIORITY_TO_NOTION[e.priority] || "High" } },
     Favorite: { checkbox: !!e.favorite },
   };
@@ -252,7 +379,7 @@ categoriesRouter.post("/api/categories", async (req, res) => {
     // Cache existing titles per touched database so we can match by title.
     const existing: Record<string, Map<string, string>> = {};
     for (const e of incoming.slice(0, 50)) {
-      const c = CATS.find((x) => x.type === e.type);
+      const c = allCats().find((x) => x.type === e.type);
       const title = String(e.title || "").trim();
       if (!c || !title) { skipped.push(`${e.type}/${title || "(untitled)"}: unknown category`); continue; }
 
