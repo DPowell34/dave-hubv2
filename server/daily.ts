@@ -60,6 +60,17 @@ async function listChildren(notion: any, blockId: string): Promise<any[]> {
  * call and holds nothing this endpoint wants, and the Notion budget is shared
  * with today-schedule and command-center.
  */
+// A day section starts with a heading_1 like "Saturday, July 18, 2026".
+// NB "End of Day Review" is also a heading_1 but is NOT a date, so it stays
+// inside today's section — this is exactly the distinction that keeps the walk
+// from either cutting today short or spilling into yesterday.
+const DATE_HEADING =
+  /^(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday), (January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}$/;
+
+function isDateHeading(b: any): boolean {
+  return b?.type === "heading_1" && DATE_HEADING.test(plain(b.heading_1?.rich_text).trim());
+}
+
 async function flattenToday(notion: any, pageId: string): Promise<any[]> {
   const heading = new Date().toLocaleDateString("en-US", {
     weekday: "long", month: "long", day: "numeric", year: "numeric", timeZone: TZ,
@@ -73,8 +84,10 @@ async function flattenToday(notion: any, pageId: string): Promise<any[]> {
   const out: any[] = [];
   const walk = async (blocks: any[]) => {
     for (const b of blocks) {
-      // The Archive link closes today's section; everything after is page furniture.
-      if (b.type === "child_page") return true;
+      // Stop at the next day's date heading, or the Archive link — either one
+      // ends today's section. Reading past it pulls in yesterday's data, which
+      // is exactly the "app shows yesterday" bug.
+      if (isDateHeading(b) || b.type === "child_page") return true;
       out.push(b);
       if (b.has_children && b.type !== "table") {
         const stop = await walk(await listChildren(notion, b.id));
