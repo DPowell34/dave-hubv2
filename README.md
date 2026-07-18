@@ -244,3 +244,22 @@ device. Requires `HUB_WRITE_KEY`.
 - The type→database map is `data/category-map.json`, not SQLite — small and hand-inspectable.
   Built-ins stay hardcoded and the registry only adds to them, so a missing or corrupt file
   degrades to "the seven still work" rather than breaking Browse.
+
+## Daily rollover
+
+`server/rollover.ts` → `src/routes/rollover.ts`. `GET /api/rollover` (dry-run default;
+`?apply=1` needs the write key). Each Master Planner day is a `heading_1`
+("Saturday, July 18, 2026"). The job **archives every non-today day** into Archive → 2026
+and **completes today additively** — fills whichever of the Morning/Afternoon/Evening
+checklists, Today's Schedule table, and End of Day Review are missing, without touching
+priorities; creates the whole day from the template if none exists. It runs itself hourly
+(marker file `data/last-rollover.txt`, once per ET day, catches up after downtime).
+
+Guardrails that must stay:
+- **Copy → verify → delete.** The archived copy is confirmed present before any original is
+  removed, and Notion deletes go to trash (30-day recoverable). Never delete first.
+- **Date-heading match excludes "End of Day Review"** (also a heading_1). Match
+  `Weekday, Month D, YYYY`, or the section walk cuts today short or reads yesterday — the
+  exact bug that made the app "show yesterday". `/api/daily`'s flattenToday had it too; fixed.
+- On deploy, seed the marker to today before restart, or the first auto-tick applies before
+  the dry run is checked.
