@@ -2755,6 +2755,29 @@ const PL_BLANK = () => ({
 });
 let plCurISO = "";
 let plState = PL_BLANK();
+let plLastToday = plTodayISO(); // what "today" was at last check, for detecting a day change
+
+/**
+ * A phone kept open (home-screen app) never reloads, so the Planner's date used
+ * to stay stuck on yesterday after midnight — including the End of Day Review.
+ * This advances to the new day, but ONLY if the user was viewing today; someone
+ * who deliberately paged back to a past day is left where they are.
+ */
+function plCheckDayRollover(){
+  const now = plTodayISO();
+  if(now === plLastToday) return;
+  const dp = document.getElementById("pl-datepick");
+  const wasOnToday = !dp || !dp.value || dp.value === plLastToday;
+  plLastToday = now;
+  if(wasOnToday){
+    if(dp) dp.value = now;
+    plLoad(now); // fresh blank day — re-renders checklists, schedule, and EOD empty
+    if(curScreen === 'planner'){ plSyncNotionSchedule(); plSyncNotionPriorities(); plSyncNotionDaily(); }
+  }
+}
+// Cheap date compare; only acts when the calendar day actually flips.
+setInterval(plCheckDayRollover, 60*1000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) plCheckDayRollover(); });
 let plSaveTimer = null;
 
 function plTodayISO(){
@@ -3099,10 +3122,11 @@ function plRenderReview(){
   });
 }
 function renderPlanner(){
-  if(!document.getElementById("pl-datepick").value){
-    document.getElementById("pl-datepick").value = plTodayISO();
-  }
-  plLoad(document.getElementById("pl-datepick").value);
+  const dp = document.getElementById("pl-datepick");
+  // Land on today unless the user had paged back to an earlier day this session.
+  if(!dp.value || dp.value === plLastToday) dp.value = plTodayISO();
+  plLastToday = plTodayISO();
+  plLoad(dp.value);
   plSyncNotionSchedule();
   plSyncNotionPriorities();
   plSyncNotionDaily();
