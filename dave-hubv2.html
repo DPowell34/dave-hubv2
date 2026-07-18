@@ -3067,11 +3067,16 @@ async function plSyncNotionDaily(){
     // ── end of day review ──
     const rv = data.review || {};
     const seenR = plState.dailySyncedFrom.review;
+    // Follow Notion even when it CLEARS a field — but only if the local value
+    // was itself synced (equals what we last pulled), never a manual edit.
+    // Without the clear case, yesterday's review that got pulled into today once
+    // stays frozen forever, because empty never overwrites it.
     const takeText = (field)=>{
       const val = String(rv[field]||'').trim();
       const cur = String(plState.review[field]||'');
       const last = seenR[field];
-      if(val && (cur === '' || (last !== undefined && cur === last)) && cur !== val){
+      const wasSynced = (last !== undefined && cur === last);
+      if(cur !== val && (cur === '' || wasSynced)){
         plState.review[field] = val; changed = true;
       }
       seenR[field] = val;
@@ -3083,7 +3088,8 @@ async function plSyncNotionDaily(){
       arr.forEach((val,i)=>{
         const v = String(val||'').trim();
         const cur = String((plState.review[field]||[])[i] || '');
-        if(v && (cur === '' || cur === (lastArr[i]||'')) && cur !== v){
+        const wasSynced = (cur === (lastArr[i]||''));
+        if(cur !== v && (cur === '' || wasSynced)){
           plState.review[field][i] = v; changed = true;
         }
       });
