@@ -2778,6 +2778,32 @@ function plCheckDayRollover(){
 // Cheap date compare; only acts when the calendar day actually flips.
 setInterval(plCheckDayRollover, 60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) plCheckDayRollover(); });
+
+/**
+ * Pick up new deploys without a manual reload — a home-screen app otherwise
+ * serves the cached HTML for days. Checks on resume and a few times a day, and
+ * reloads ONLY when the served file actually changed and the user isn't mid-edit
+ * (so a reload never eats something you're typing). Pairs with nginx sending
+ * Cache-Control: no-cache on the HTML, so the reload fetches fresh bytes.
+ */
+let _buildTag = null, _pendingReload = false;
+async function checkForUpdate(){
+  try{
+    const r = await fetch('/index.html?v='+Date.now(), {method:'HEAD', cache:'no-store'});
+    const tag = r.headers.get('ETag') || r.headers.get('Last-Modified');
+    if(!tag) return;
+    if(_buildTag === null){ _buildTag = tag; return; }   // first run just records the version
+    if(tag !== _buildTag){
+      _buildTag = tag;
+      if(document.querySelector('input:focus, textarea:focus')) _pendingReload = true; // wait until they stop typing
+      else location.reload();
+    }
+  }catch(_){ /* offline — try again next tick */ }
+}
+setInterval(checkForUpdate, 6*60*60*1000);               // ~4x/day backstop for an always-open app
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) checkForUpdate(); });
+document.addEventListener('focusout', ()=>{ if(_pendingReload){ _pendingReload=false; setTimeout(()=>location.reload(), 400); } });
+setTimeout(checkForUpdate, 5000);                        // seed the version a few seconds after load
 let plSaveTimer = null;
 
 function plTodayISO(){
