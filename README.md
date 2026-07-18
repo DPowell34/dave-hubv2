@@ -263,3 +263,24 @@ Guardrails that must stay:
   exact bug that made the app "show yesterday". `/api/daily`'s flattenToday had it too; fixed.
 - On deploy, seed the marker to today before restart, or the first auto-tick applies before
   the dry run is checked.
+
+## Full Sail Saturday cleanup
+
+`server/fullsail.ts` → `src/routes/fullsail.ts`. `GET /api/fullsail-clean` (dry-run default;
+`?apply=1` needs the write key). Every Saturday ~05:30 ET it reads the current "Week Plan of
+Action" page's checkboxes and deletes the matching Full Sail Google Calendar events for items
+checked off. Token match (lab6/lab7/quiz/int5/int6/disc/reading); **only events whose title
+contains "Full Sail" are ever eligible**, so a shared word can't catch an unrelated event.
+Completed items stay marked done in Notion (the checkbox is the marker); only the calendar
+event is removed (Google trash, 30-day recoverable).
+
+The **Full Sail portal can't be read by the cron** — it's behind Dave's login and needs the
+Chrome extension driving his live browser. Sync the portal into the checkboxes interactively
+(Claude + Chrome) when he's around; the unattended job trusts the checkboxes.
+
+## Cache refresh
+
+nginx sends `Cache-Control: no-cache` on the doc root so browsers revalidate the HTML, and the
+client `checkForUpdate()` reloads to a new build on resume / a few times a day (never
+mid-edit). Edit the nginx conf with a simple `sed` after `location / {`, `nginx -t`, then
+reload — a multi-line perl edit corrupted it once (caught and auto-restored).
