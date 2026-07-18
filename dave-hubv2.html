@@ -2833,6 +2833,23 @@ function plLoad(iso){
       };
     }
   }catch(e){}
+  // The End of Day Review starts blank each day. Each day's review is stamped
+  // with its date (reviewDay); if TODAY's stored review carries content that
+  // isn't stamped for today, it's a leftover from a previous day and is cleared.
+  // Only TODAY is ever cleared — navigating to a past day never wipes its review,
+  // so real history is safe.
+  if(iso === plTodayISO()){
+    const rHas = [plState.review.highlight, plState.review.notes]
+      .concat(plState.review.enjoyed||[], plState.review.notEnjoyed||[],
+              plState.review.challenges||[], plState.review.changes||[])
+      .some(x=>String(x||'').trim());
+    if(rHas && plState.reviewDay !== iso){
+      plState.review = PL_BLANK().review;
+      if(plState.dailySyncedFrom) plState.dailySyncedFrom.review = {};
+    }
+    plState.reviewDay = iso;
+    try{ localStorage.setItem(plKey(iso), JSON.stringify(plState)); }catch(e){} // persist immediately (plScheduleSave debounces)
+  }
   plRenderAll();
   refreshTodayCard();
 }
