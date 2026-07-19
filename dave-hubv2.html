@@ -273,6 +273,10 @@ html,body{
 /* ══════════ CATEGORY SUBPAGE ══════════ */
 .cat-hero{color:#fff;padding:20px 16px 16px;margin-bottom:0}
 .cat-hero-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cat-io-btn{margin-left:auto;flex-shrink:0;background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.45);
+  color:#fff;font-family:var(--f);font-size:11px;font-weight:800;border-radius:20px;padding:7px 12px;cursor:pointer;
+  white-space:nowrap;transition:transform .15s}
+.cat-io-btn:active{transform:scale(.94)}
 .cat-hero-icon{font-size:40px}
 .cat-hero-name{font-size:22px;font-weight:900;letter-spacing:-.4px}
 .cat-hero-sub{font-size:13px;opacity:.85;margin-top:2px}
@@ -1138,6 +1142,7 @@ html,body{
       <div class="cat-hero-top">
         <div class="cat-hero-icon" id="ch-icon">🍽️</div>
         <div><div class="cat-hero-name" id="ch-name">Places</div><div class="cat-hero-sub" id="ch-sub">0 entries</div></div>
+        <button class="cat-io-btn" onclick="openCatIO()" title="Import / Export this category">⇅ Import / Export</button>
       </div>
       <div class="cat-hero-stats" id="ch-stats"></div>
     </div>
@@ -1446,6 +1451,35 @@ html,body{
       <button class="btn btn-pri" onclick="saveNewCat()" style="flex:1;justify-content:center">Add</button>
       <button class="btn btn-ghost" onclick="document.getElementById('addcat-ov').classList.remove('open')">Cancel</button>
     </div>
+  </div>
+</div>
+
+<!-- Per-category Import / Export: type is fixed to whichever category you opened it from -->
+<div class="mmod-ov" id="cat-io-ov" onclick="maybeClose('cat-io-ov')">
+  <div class="mmod" style="max-width:520px">
+    <div class="mmod-title" id="cio-title">Import / Export</div>
+    <div class="io-card" style="margin:0 0 12px">
+      <div class="io-title">⬇️ Export <span id="cio-exp-name">this category</span></div>
+      <div class="io-sub">Download this category's entries as CSV.</div>
+      <div class="io-btn-row"><button class="btn btn-pri btn-sm" onclick="catExportCSV()">📥 Export CSV</button></div>
+    </div>
+    <div class="io-card" style="margin:0 0 12px">
+      <div class="io-title">⬆️ Paste CSV → <span id="cio-imp-name">this category</span></div>
+      <div class="io-sub">Required: <strong>title</strong>. Optional: subtype, status, priority, cost, notes, tags, website, author, platform. <em>No “type” column needed — everything imports into this category.</em></div>
+      <textarea class="tcode" id="cio-csv" placeholder="title,author,status&#10;Atomic Habits,James Clear,want"></textarea>
+      <div class="io-btn-row" style="margin-top:9px">
+        <button class="btn btn-pri btn-sm" onclick="catImportCSV()">📥 Import here</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('cio-csv').value=''">Clear</button>
+      </div>
+    </div>
+    <div class="io-card" style="margin:0 0 12px">
+      <div class="io-title">📊 Google Sheets → <span id="cio-gs-name">this category</span></div>
+      <div class="io-sub">Publish the sheet to web as CSV, paste the link.</div>
+      <input class="fi" id="cio-gs-url" placeholder="https://docs.google.com/…/pub?output=csv" style="margin-bottom:10px">
+      <div class="io-btn-row"><button class="btn btn-pri btn-sm" onclick="catImportGSheets()">📥 Import from Sheets</button></div>
+    </div>
+    <div id="cio-res"></div>
+    <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="document.getElementById('cat-io-ov').classList.remove('open')">Close</button>
   </div>
 </div>
 
@@ -2653,6 +2687,97 @@ function importCSV(){
 }
 
 function parseL(l){const r=[];let c='';let q=false;for(let i=0;i<l.length;i++){if(l[i]==='"'){q=!q;}else if(l[i]===','&&!q){r.push(c);c='';}else c+=l[i];}r.push(c);return r;}
+
+/* ═══════ PER-CATEGORY IMPORT / EXPORT ═══════
+   Opened from a category screen; the type is FIXED to that category, so a CSV
+   of books imported from the Books screen lands in Books with no "type" column. */
+function catMapStatus(val, c){
+  const v = String(val||'').trim().toLowerCase();
+  if(['want','prog','done'].includes(v)) return v;
+  const sl = c.sl || {};
+  for(const k of ['want','prog','done']) if(String(sl[k]||'').toLowerCase() === v) return k;
+  return 'want';
+}
+function catMapPriority(val){
+  const v = String(val||'').trim().toLowerCase().replace(/[-_]/g,' ');
+  if(['must','high','someday'].includes(v)) return v;
+  if(v==='must do') return 'must';
+  if(v==='someday') return 'someday';
+  return 'high';
+}
+function openCatIO(){
+  const c = getC(curCatId);
+  document.getElementById('cio-title').textContent = 'Import / Export — ' + c.name;
+  ['cio-exp-name','cio-imp-name','cio-gs-name'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=c.name; });
+  document.getElementById('cio-csv').value='';
+  document.getElementById('cio-gs-url').value='';
+  document.getElementById('cio-res').innerHTML='';
+  const sub = (c.subs && c.subs[0]) ? c.subs[0] : '';
+  document.getElementById('cio-csv').placeholder = 'title,subtype,status\nExample,'+sub+','+(c.sl?c.sl.want:'want');
+  document.getElementById('cat-io-ov').classList.add('open');
+}
+function runCatImport(raw){
+  const c = getC(curCatId);
+  const lines = String(raw||'').split('\n').filter(l=>l.trim());
+  if(lines.length < 2){ showToast('⚠️ No rows to import'); return; }
+  const H = parseL(lines[0]).map(h=>h.replace(/"/g,'').trim().toLowerCase());
+  let added=0, skipped=0; const newOnes=[];
+  for(let i=1;i<lines.length;i++){
+    const vals = parseL(lines[i]);
+    const row = {}; H.forEach((h,j)=>{ row[h]=(vals[j]||'').replace(/^"|"$/g,'').trim(); });
+    if(!row.title){ skipped++; continue; }
+    // dedup within THIS category only (same title in another category is fine)
+    if(entries.find(e=>e.type===curCatId && e.title.toLowerCase()===row.title.toLowerCase())){ skipped++; continue; }
+    const e = { id:Date.now()+i, type:curCatId, title:row.title,
+      category: row.subtype || row['sub-type'] || row.category || '',
+      city:row.city||'', address:row.address||'',
+      status: catMapStatus(row.status, c), priority: catMapPriority(row.priority),
+      cost:row.cost||'$', website:row.website||'', photo:row.photo||'', notes:row.notes||'',
+      tags: row.tags ? row.tags.split(';').filter(Boolean) : [], favorite: row.favorite==='true',
+      dateNight:row.datenight==='true', kidFriendly:row.kidfriendly==='true', indoor:row.indoor==='true', outdoor:row.outdoor==='true',
+      author:row.author||'', platform:row.platform||'', genre:row.genre||'', eventDate:row.eventdate||'', venue:row.venue||'',
+      pages: parseInt(row.pages)||0,
+      addedDate: row.addeddate || new Date().toISOString().split('T')[0], rating: parseFloat(row.rating)||0 };
+    entries.unshift(e); newOnes.push(e); added++;
+  }
+  sEntries();
+  // push new entries to this category's Notion database if a write key is set
+  if(newOnes.length && typeof pushEntriesToNotion==='function' && wkGet()){
+    pushEntriesToNotion(newOnes).then(ok=>{ if(ok) setTimeout(()=>{ if(typeof syncNotionCategories==='function') syncNotionCategories(); }, 1500); });
+  }
+  const note = wkGet() ? ' · syncing to Notion' : '';
+  document.getElementById('cio-res').innerHTML =
+    `<div class="io-card" style="text-align:center;margin:0 0 12px"><div style="font-size:32px">✅</div>`+
+    `<div style="font-size:15px;font-weight:800;margin:6px 0">Imported into ${c.name}</div>`+
+    `<div style="color:var(--t2);font-size:12px">Added ${added} · Skipped ${skipped} duplicate${skipped===1?'':'s'}${note}</div></div>`;
+  showToast(`✅ ${added} added to ${c.name}!`);
+  if(typeof refreshView==='function') refreshView();
+  if(typeof renderCatHero==='function') renderCatHero();
+  if(typeof renderCatList==='function') renderCatList();
+}
+function catImportCSV(){
+  const raw=(document.getElementById('cio-csv').value||'').trim();
+  if(!raw){ showToast('⚠️ Paste some CSV first'); return; }
+  runCatImport(raw);
+}
+async function catImportGSheets(){
+  const url=(document.getElementById('cio-gs-url').value||'').trim();
+  if(!url){ showToast('⚠️ Paste a Sheets CSV URL'); return; }
+  showToast('⏳ Fetching…');
+  try{ const r=await fetch(url); if(!r.ok) throw 0; const t=await r.text(); runCatImport(t); }
+  catch{ showToast("❌ Could not fetch — publish the sheet publicly as CSV"); }
+}
+function catExportCSV(){
+  const c = getC(curCatId);
+  const list = entries.filter(e=>e.type===curCatId);
+  if(!list.length){ showToast('Nothing to export in '+c.name); return; }
+  const H=['title','type','category','city','address','status','priority','cost','website','photo','notes','tags','favorite','dateNight','kidFriendly','indoor','outdoor','author','platform','genre','eventDate','venue','pages','addedDate','rating'];
+  const rows=list.map(e=>H.map(h=>h==='tags'?`"${(e.tags||[]).join(';').replace(/"/g,'""')}"`:(`"${String(e[h]??'').replace(/"/g,'""')}"`)).join(','));
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([[H.join(','),...rows].join('\n')],{type:'text/csv'}));
+  a.download=`${c.name.replace(/\s+/g,'-')}-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click(); showToast('📥 Exported '+list.length+' from '+c.name);
+}
 function esc(s){return(s||'').replace(/'/g,"\\'");}
 
 // ═══════ TIKTOK SEARCH ═══════
