@@ -2937,6 +2937,16 @@ function plTodayISO(){
 }
 function plKey(iso){ return "planner:"+iso; }
 
+// A signature of a review's content; empty string if the review is all-blank
+// (so blank reviews never "match" each other).
+function plReviewSig(r){
+  if(!r) return '';
+  const parts = [r.highlight, r.notes]
+    .concat(r.enjoyed||[], r.notEnjoyed||[], r.challenges||[], r.changes||[])
+    .map(x=>String(x||'').trim());
+  return parts.some(x=>x) ? parts.join('␟') : '';
+}
+
 function plLoad(iso){
   plCurISO = iso;
   plState = PL_BLANK();
@@ -2958,17 +2968,29 @@ function plLoad(iso){
       };
     }
   }catch(e){}
-  // The End of Day Review starts blank each day. Each day's review is stamped
-  // with its date (reviewDay); if TODAY's stored review carries content that
-  // isn't stamped for today, it's a leftover from a previous day and is cleared.
-  // Only TODAY is ever cleared — navigating to a past day never wipes its review,
-  // so real history is safe.
+  // The End of Day Review starts blank each day. Only TODAY is ever cleared —
+  // navigating to a past day never wipes its review, so real history is safe.
+  // Two triggers for "this is a leftover from another day":
+  //   (a) it isn't stamped for today (the normal case), OR
+  //   (b) it's a byte-for-byte copy of some OTHER day's stored review — this
+  //       catches content a sync re-pulled and re-stamped as today, which the
+  //       stamp check alone would miss. A user typing an identical full review
+  //       (highlight + all lists + notes) on two days is effectively impossible,
+  //       so an exact match means it's a duplicate, not genuine.
   if(iso === plTodayISO()){
-    const rHas = [plState.review.highlight, plState.review.notes]
-      .concat(plState.review.enjoyed||[], plState.review.notEnjoyed||[],
-              plState.review.challenges||[], plState.review.changes||[])
-      .some(x=>String(x||'').trim());
-    if(rHas && plState.reviewDay !== iso){
+    const sig = plReviewSig(plState.review);
+    let stale = false;
+    if(sig){
+      if(plState.reviewDay !== iso){ stale = true; }
+      else {
+        for(const k of Object.keys(localStorage)){
+          if(k !== plKey(iso) && k.indexOf('planner:')===0){
+            try{ if(plReviewSig(JSON.parse(localStorage.getItem(k)).review) === sig){ stale = true; break; } }catch(e){}
+          }
+        }
+      }
+    }
+    if(stale){
       plState.review = PL_BLANK().review;
       if(plState.dailySyncedFrom) plState.dailySyncedFrom.review = {};
     }
