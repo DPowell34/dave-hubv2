@@ -1380,7 +1380,7 @@ html,body{
         <div class="sr" onclick="editWriteKey()">
           <div class="sr-ico">🔑</div>
           <div class="sr-info">
-            <div class="sr-lbl">Notion Write Key</div>
+            <div class="sr-lbl">Hub Write Key</div>
             <div class="sr-sub" id="sr-wk">Not set — entries stay on this device</div>
           </div>
           <div class="sr-r">›</div>
@@ -2302,15 +2302,19 @@ function renderWriteKey(){
 
 async function editWriteKey(){
   const cur = wkGet();
-  const v = prompt('Notion write key\n\nPaste the key to let this device write entries to Notion.\nLeave blank to clear it.', cur);
+  const v = prompt('Hub Write Key — NOT your Notion token.\n\nPaste the HUB_WRITE_KEY from your master-planner-sync .env to let this device write to Notion.\nLeave blank to clear it.', cur);
   if(v === null) return;
   const key = v.trim();
-  wkSet(key);
-  renderWriteKey();
-  if(!key){ showToast('🔒 Write key cleared'); return; }
+  if(!key){ wkSet(''); renderWriteKey(); showToast('🔒 Write key cleared'); return; }
+  if(key === cur){ showToast('✅ Key unchanged — already set'); return; }
   showToast('⏳ Checking key…');
-  const ok = await pushEntriesToNotion([], true);
-  showToast(ok ? '✅ Key accepted — this device can write' : '❌ Key rejected — check and re-paste');
+  let ok = false;
+  try {
+    const res = await fetch('https://planner.romeobravos.net/api/categories', { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+key }, body: JSON.stringify({ entries: [] }) });
+    ok = res.ok;
+  } catch(_) { showToast('⚠️ Offline — key not changed, your saved key was kept'); return; }
+  if(ok){ wkSet(key); renderWriteKey(); showToast('✅ Key accepted — this device can write'); }
+  else { showToast('❌ Key rejected — your saved key was kept (this field wants your Hub key, not your Notion token)'); }
 }
 
 /**
