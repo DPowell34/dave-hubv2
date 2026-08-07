@@ -1285,6 +1285,33 @@ html,body{
     </div>
 
     <div class="pl-card">
+      <h3>🏆 Successful Men — Core Habits</h3>
+      <div class="pl-sub">Read it. Live it. The daily checklist below is where you track it.</div>
+      <div class="pl-agree-list">
+        <button type="button" class="pl-agree b"><span class="pl-agree-num">1</span><span class="pl-agree-txt">Wins the Morning — up early, no snooze</span></button>
+        <button type="button" class="pl-agree o"><span class="pl-agree-num">2</span><span class="pl-agree-txt">Trains the Body Daily — movement is non-negotiable</span></button>
+        <button type="button" class="pl-agree b"><span class="pl-agree-num">3</span><span class="pl-agree-txt">Protects Deep Work — highest-leverage task first</span></button>
+        <button type="button" class="pl-agree o"><span class="pl-agree-num">4</span><span class="pl-agree-txt">Reads to Stay Sharp — daily input compounds</span></button>
+        <button type="button" class="pl-agree b"><span class="pl-agree-num">5</span><span class="pl-agree-txt">Tracks Money Like a KPI — protects capital first</span></button>
+        <button type="button" class="pl-agree o"><span class="pl-agree-num">6</span><span class="pl-agree-txt">Keeps His Word — commitments are contracts</span></button>
+        <button type="button" class="pl-agree b"><span class="pl-agree-num">7</span><span class="pl-agree-txt">Reflects Every Night — closes the loop</span></button>
+        <button type="button" class="pl-agree o"><span class="pl-agree-num">8</span><span class="pl-agree-txt">Invests in the Right People — raises the standard</span></button>
+      </div>
+    </div>
+
+    <div class="pl-card">
+      <h3>💪 5-Day Workout Split</h3>
+      <div class="pl-sub">Mon–Fri, 7:15–8:15 AM. Weekends are rest days. Today's list is in the checklist below.</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div><strong>Mon — Chest + Abs</strong><div style="opacity:.7;font-size:13px;line-height:1.5;">Barbell Bench Press 4x8 · Incline DB Press 3x10 · Cable Fly 3x12 · Dips 3x10 · Hanging Leg Raise 3x15 · Plank 3x45s</div></div>
+        <div><strong>Tue — Back + Abs</strong><div style="opacity:.7;font-size:13px;line-height:1.5;">Deadlift 4x6 · Pull-Ups 4x8 · Barbell Row 3x10 · Lat Pulldown 3x12 · Cable Crunch 3x15 · Russian Twist 3x20</div></div>
+        <div><strong>Wed — Legs</strong><div style="opacity:.7;font-size:13px;line-height:1.5;">Barbell Squat 4x8 · Romanian Deadlift 3x10 · Leg Press 3x12 · Walking Lunge 3x12/leg · Leg Curl 3x12 · Calf Raise 4x15</div></div>
+        <div><strong>Thu — Chest + Back</strong><div style="opacity:.7;font-size:13px;line-height:1.5;">Incline Barbell Press 4x8 · Weighted Pull-Ups 4x8 · Flat DB Press 3x10 · Seated Cable Row 3x10 · Push-Ups (burnout) 3xAMRAP · Face Pulls 3x15</div></div>
+        <div><strong>Fri — Legs + Abs</strong><div style="opacity:.7;font-size:13px;line-height:1.5;">Front Squat 4x8 · Bulgarian Split Squat 3x10/leg · Hip Thrust 3x12 · Leg Extension 3x12 · Weighted Sit-Ups 3x15 · Side Plank 3x30s/side</div></div>
+      </div>
+    </div>
+
+    <div class="pl-card">
       <h3>👑 Daily Wisdom for Kings</h3>
       <div class="pl-sub">Growth, self-care, and love — tap ⟳ for a new prompt.</div>
       <div id="pl-tips"></div>
@@ -1333,6 +1360,14 @@ html,body{
       </div>
       <div class="pl-check-block"    data-part="evening">
         <h4>🌙 Evening</h4><div class="pl-check-list"></div>
+        <button class="pl-add-mini">+ Add item</button>
+      </div>
+      <div class="pl-check-block b"  data-part="habits">
+        <h4>🏆 Habits</h4><div class="pl-check-list"></div>
+        <button class="pl-add-mini">+ Add item</button>
+      </div>
+      <div class="pl-check-block"  data-part="workout">
+        <h4>💪 Workout</h4><div class="pl-check-list"></div>
         <button class="pl-add-mini">+ Add item</button>
       </div>
     </div>
@@ -2878,8 +2913,20 @@ const PL_PRIO_CATS = [
 const PL_DEFAULT_CHECKS = {
   morning:  ["Walk Broly / Water","Make Bed","Water","Meds / Supplements","Coffee","Breakfast"],
   afternoon:["Walk Broly / Water","Lunch / Snack"],
-  evening:  ["Walk Broly / Water","Dinner","Journal Entry"]
+  evening:  ["Walk Broly / Water","Dinner","Journal Entry"],
+  habits:   ["Won the morning (no snooze)","Trained / moved the body","Protected deep work block","Read / studied","Checked the numbers (money/trading)","Kept a commitment","Reflected before bed","Invested in a key relationship"]
 };
+const PL_WORKOUT_SPLIT = {
+  1: {label:"Chest + Abs",   exercises:["Barbell Bench Press — 4x8","Incline Dumbbell Press — 3x10","Cable Fly — 3x12","Dips — 3x10","Hanging Leg Raise — 3x15","Plank — 3x45s"]},
+  2: {label:"Back + Abs",    exercises:["Deadlift — 4x6","Pull-Ups — 4x8","Barbell Row — 3x10","Lat Pulldown — 3x12","Cable Crunch — 3x15","Russian Twist — 3x20"]},
+  3: {label:"Legs",          exercises:["Barbell Squat — 4x8","Romanian Deadlift — 3x10","Leg Press — 3x12","Walking Lunge — 3x12/leg","Leg Curl — 3x12","Calf Raise — 4x15"]},
+  4: {label:"Chest + Back",  exercises:["Incline Barbell Press — 4x8","Weighted Pull-Ups — 4x8","Flat Dumbbell Press — 3x10","Seated Cable Row — 3x10","Push-Ups (burnout) — 3xAMRAP","Face Pulls — 3x15"]},
+  5: {label:"Legs + Abs",    exercises:["Front Squat — 4x8","Bulgarian Split Squat — 3x10/leg","Hip Thrust — 3x12","Leg Extension — 3x12","Weighted Sit-Ups — 3x15","Side Plank — 3x30s/side"]}
+};
+function plWorkoutForISO(iso){
+  const d = new Date(iso+"T00:00:00");
+  return PL_WORKOUT_SPLIT[d.getDay()] || null;
+}
 const PL_HOURS = Array.from({length:16},(_,i)=>i+6);
 const PL_DEFAULT_SCHEDULE = {
    6:"6:30–7:00 AM — Walk Broly",
@@ -2895,14 +2942,16 @@ const PL_DEFAULT_SCHEDULE = {
   20:"",
   21:"8:30 PM — Bed Time"
 };
-const PL_BLANK = () => ({
+const PL_BLANK = (iso) => ({
   focus:"",
   agreements: PL_AGREEMENTS.map(txt => ({txt, done:false})),
   priorities: Object.fromEntries(PL_PRIO_CATS.map(c=>[c.key,""])),
   checks: {
     morning:   PL_DEFAULT_CHECKS.morning.map(t   => ({t, d:false})),
     afternoon: PL_DEFAULT_CHECKS.afternoon.map(t => ({t, d:false})),
-    evening:   PL_DEFAULT_CHECKS.evening.map(t   => ({t, d:false}))
+    evening:   PL_DEFAULT_CHECKS.evening.map(t   => ({t, d:false})),
+    habits:    PL_DEFAULT_CHECKS.habits.map(t    => ({t, d:false})),
+    workout:   (plWorkoutForISO(iso || plTodayISO())?.exercises || []).map(t => ({t, d:false}))
   },
   schedule: {...PL_DEFAULT_SCHEDULE},
   scheduleSyncedFrom: {},
@@ -2982,7 +3031,7 @@ function plReviewSig(r){
 
 function plLoad(iso){
   plCurISO = iso;
-  plState = PL_BLANK();
+  plState = PL_BLANK(iso);
   try{
     const raw = localStorage.getItem(plKey(iso));
     if(raw){
@@ -2993,7 +3042,9 @@ function plLoad(iso){
         checks:{
           morning:   saved.checks?.morning   || plState.checks.morning,
           afternoon: saved.checks?.afternoon || plState.checks.afternoon,
-          evening:   saved.checks?.evening   || plState.checks.evening
+          evening:   saved.checks?.evening   || plState.checks.evening,
+          habits:    saved.checks?.habits    || plState.checks.habits,
+          workout:   saved.checks?.workout   || plState.checks.workout
         },
         schedule:{...plState.schedule, ...(saved.schedule||{})},
         scheduleSyncedFrom:{...plState.scheduleSyncedFrom, ...(saved.scheduleSyncedFrom||{})},
@@ -3216,7 +3267,7 @@ function plPushNotion(){
       const d = await res.json();
       // Record what Notion now holds so the next pull doesn't undo this push.
       if(!plState.dailySyncedFrom) plState.dailySyncedFrom = {checks:{}, review:{}};
-      ['morning','afternoon','evening'].forEach(part=>{
+      ['morning','afternoon','evening','habits','workout'].forEach(part=>{
         const seen = plState.dailySyncedFrom.checks[part] || (plState.dailySyncedFrom.checks[part] = {});
         (plState.checks[part]||[]).forEach(i=> seen[String(i.t||'').trim().toLowerCase()] = i.d);
       });
@@ -3241,7 +3292,7 @@ async function plSyncNotionDaily(){
     let changed = false;
 
     // ── checklists ──
-    ['morning','afternoon','evening'].forEach(part=>{
+    ['morning','afternoon','evening','habits','workout'].forEach(part=>{
       const remote = (data.checks && data.checks[part]) || [];
       if(!remote.length) return;
       const seen = plState.dailySyncedFrom.checks[part] || (plState.dailySyncedFrom.checks[part] = {});
