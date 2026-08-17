@@ -1071,6 +1071,29 @@ html,body{
       <div class="pl-quote-src" id="pl-quote-src">—</div>
     </div>
 
+    <div class="cc-card">
+      <div class="cc-card-hd"><div class="cc-card-t">📊 Trading — Daily Review</div><div class="cc-card-c" id="tdr-date">—</div></div>
+      <div class="pad" style="padding-top:0;font-size:13px">
+        <div id="tdr-body" style="opacity:.55">Loading latest review…</div>
+      </div>
+    </div>
+    <script>
+    (function(){
+      fetch('/trading-review.json?ts='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+        var el=document.getElementById('tdr-body'); var hd=document.getElementById('tdr-date');
+        if(!d||!d.date){el.textContent='No review published yet.';return;}
+        function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+        hd.textContent=d.date+(d.grade&&d.grade!=='—'?(' · Grade '+d.grade):'');
+        var rows='';
+        (d.rows||[]).forEach(function(r,i){
+          rows+='<div style="padding:8px 0;'+(i?'border-top:1px solid rgba(255,255,255,.08)':'')+'"><b>'+esc(r.t)+'</b>'+(r.s?'<div style="opacity:.55;font-size:12px;margin-top:2px">'+esc(r.s)+'</div>':'')+'</div>';
+        });
+        el.style.opacity=1;
+        el.innerHTML=rows||('<div style="opacity:.55">'+esc(d.summary||'No detail published.')+'</div>');
+        if(d.notion_url){el.innerHTML+='<a href="'+esc(d.notion_url)+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:9px;font-size:13px;color:#6ea8ff;text-decoration:none">Full review in Notion →</a>';}
+      }).catch(function(){var el=document.getElementById('tdr-body'); if(el)el.textContent='Review feed unavailable.';});
+    })();
+    </script>
     <div class="cc-card"><div class="cc-card-hd"><div class="cc-card-t">📈 Trading — Week 1 Review</div><div class="cc-card-c">Aug 5–14</div></div><div class="pad" style="padding-top:0;font-size:13px"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px"><div style="flex:1;min-width:88px;text-align:center;background:rgba(255,255,255,.06);border-radius:9px;padding:9px 6px"><div style="font-size:16px;font-weight:800;color:#ff8a8a">−$31.55</div><div style="font-size:10px;opacity:.55;text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Net P&amp;L</div></div><div style="flex:1;min-width:88px;text-align:center;background:rgba(255,255,255,.06);border-radius:9px;padding:9px 6px"><div style="font-size:16px;font-weight:800">25%</div><div style="font-size:10px;opacity:.55;text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Win rate · 10/40</div></div><div style="flex:1;min-width:88px;text-align:center;background:rgba(255,255,255,.06);border-radius:9px;padding:9px 6px"><div style="font-size:16px;font-weight:800;color:#7ee2a8">+2.35R</div><div style="font-size:10px;opacity:.55;text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Best · XHLD +7.3%</div></div></div><div style="padding:9px 0;border-top:1px solid rgba(255,255,255,.08);margin-top:8px"><b>Only green day: Aug 14 (+$3.70)</b><div style="opacity:.55;font-size:12px;margin-top:2px">Trend day — fresh morning entry, winners held, the trailing stop did the work</div></div><div style="padding:9px 0;border-top:1px solid rgba(255,255,255,.08)"><b>Biggest leak: 26 same-day re-entries (−$22.04)</b><div style="opacity:.55;font-size:12px;margin-top:2px">Scrap positions ≤$15 went 0-for-8 · XHLD alone was 28 of 40 trades</div></div><div style="padding:9px 0;border-top:1px solid rgba(255,255,255,.08)"><b>Week 2 rails now live in the bot</b><div style="opacity:.55;font-size:12px;margin-top:2px">GFV-proof settled funds · 10% daily breaker · $15 min size · one symbol, one shot per day · rotation off</div></div><a href="https://app.notion.com/p/3bf9701090f08137bf49f9ab5b442d10" target="_blank" rel="noopener" style="display:inline-block;margin-top:7px;font-size:13px;color:#6ea8ff;text-decoration:none">Full Week 1 Review in Notion →</a></div></div>
     <div class="cc-card">
       <div class="cc-card-hd"><div class="cc-card-t">🎂 Important Dates</div><div class="cc-card-c" id="id-count-cc">—</div></div>
