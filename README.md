@@ -26,12 +26,12 @@ Two things to know before you touch anything:
 
 ## Deploying
 
-The box is reachable via **AWS SSM** (no SSH needed): instance `i-0c750f471912bb58e`
-in **us-east-1**. Push to `main` first, then run, backing up and gating on the checksum:
+The box is reachable via **AWS SSM** (no SSH needed): instance `i-088a1050030cac14d`
+in **us-east-2**. Push to `main` first, then run, backing up and gating on the checksum:
 
 ```bash
 SHA=$(git show HEAD:dave-hubv2.html | sha256sum | awk '{print $1}')
-aws ssm send-command --region us-east-1 --instance-ids i-0c750f471912bb58e \
+aws ssm send-command --region us-east-2 --instance-ids i-088a1050030cac14d \
   --document-name AWS-RunShellScript --parameters "{\"commands\":[
     \"set -euo pipefail\", \"cd /var/www/romeobravo\",
     \"cp -p index.html index.html.bak-\$(date +%Y%m%d-%H%M%S)\",
