@@ -907,6 +907,10 @@ html,body{
     <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
     CryptoSignal
   </button>
+  <button class="side-btn" data-screen="ops">
+    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><polyline points="6,11 9,8 12,11 16,7"/></svg>
+    Server Ops
+  </button>
   <button class="side-btn" data-screen="browse">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     Browse
@@ -1046,6 +1050,32 @@ html,body{
         <a href="/crypto/" target="_blank" rel="noopener" style="font-size:12px;color:#6ea8ff;text-decoration:none">Open full screen →</a>
       </div>
       <iframe id="cs-frame" src="/crypto/" title="CryptoSignal dashboard" style="width:100%;height:calc(100vh - 170px);border:0;border-radius:14px;background:#0d1117"></iframe>
+    </div>
+  </div>
+
+  <!-- SERVER OPS -->
+  <div class="screen" id="scr-ops">
+    <div class="pad" style="padding-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 12px">
+        <div style="font-size:17px;font-weight:800">🖥 Server Ops — DPTC-Server 1</div>
+        <div id="ops-stamp" style="font-size:11px;opacity:.5">loading…</div>
+      </div>
+      <div class="cc-card">
+        <div class="cc-card-hd"><div class="cc-card-t">📦 Containers</div><div class="cc-card-c" id="ops-count">—</div></div>
+        <div class="pad" style="padding-top:0;font-size:13px" id="ops-containers">Loading…</div>
+      </div>
+      <div class="cc-card">
+        <div class="cc-card-hd"><div class="cc-card-t">🪙 CryptoSignal watch</div><div class="cc-card-c">latest tick</div></div>
+        <div class="pad" style="padding-top:0"><div id="ops-watch" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;opacity:.85">—</div></div>
+      </div>
+      <div class="cc-card">
+        <div class="cc-card-hd"><div class="cc-card-t">🤖 Rotation bot — last log lines</div><div class="cc-card-c">live</div></div>
+        <div class="pad" style="padding-top:0"><div id="ops-bot" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;opacity:.85;line-height:1.6;word-break:break-word">—</div></div>
+      </div>
+      <div class="cc-card">
+        <div class="cc-card-hd"><div class="cc-card-t">📊 Host</div><div class="cc-card-c">EC2 · us-east-2</div></div>
+        <div class="pad" style="padding-top:0;font-size:13px" id="ops-host">—</div>
+      </div>
     </div>
   </div>
 
@@ -4265,6 +4295,38 @@ function mrRenderAll(){ mrRenderCard(); mrRenderPlanner(); }
   btn.addEventListener('click',function(){ var open=sb.classList.toggle('open'); scrim.classList.toggle('show',open); });
   scrim.addEventListener('click',close);
   sb.addEventListener('click',function(e){ if(e.target.closest('.side-btn')) setTimeout(close,120); });
+})();
+</script>
+<script>
+(function(){
+  function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  function render(d){
+    var st=document.getElementById('ops-stamp'); if(!st)return;
+    if(!d){st.textContent='status feed unavailable';return;}
+    st.textContent='updated '+esc(d.generated||'?')+' · refreshes every 60s';
+    var cs=d.containers||[], up=cs.filter(function(c){return c.state==='running';}).length;
+    document.getElementById('ops-count').textContent=up+'/'+cs.length+' up';
+    document.getElementById('ops-containers').innerHTML=cs.map(function(c,i){
+      var dot=c.state==='running'?'#2ecc71':'#e74c3c';
+      return '<div style="display:flex;gap:10px;align-items:center;padding:8px 0;'+(i?'border-top:1px solid rgba(255,255,255,.08)':'')+'">'
+        +'<span style="flex:0 0 9px;height:9px;border-radius:50%;background:'+dot+'"></span>'
+        +'<span style="flex:1;min-width:0"><b>'+esc(c.name)+'</b>'
+        +'<div style="opacity:.55;font-size:11.5px;margin-top:1px">'+esc(c.status)+(c.ports?(' · '+esc(c.ports)):'')+'</div></span>'
+        +'<span style="text-align:right;font-size:11.5px;opacity:.7">'+esc(c.cpu||'')+'<br>'+esc(c.mem||'')+'</span></div>';
+    }).join('')||'<div style="opacity:.5">No containers reported.</div>';
+    document.getElementById('ops-watch').textContent=d.watch_tick||'—';
+    document.getElementById('ops-bot').innerHTML=(d.bot_log||[]).map(esc).join('<br>')||'—';
+    var h=d.host||{};
+    document.getElementById('ops-host').innerHTML=
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +['<b>Load</b><br>'+esc(h.load||'—'),'<b>Disk</b><br>'+esc(h.disk_used||'—')+' / '+esc(h.disk_total||'—')+' ('+esc(h.disk_pct||'—')+')','<b>Memory</b><br>'+esc(h.mem_used_mb||'—')+' / '+esc(h.mem_total_mb||'—')+' MB']
+      .map(function(x){return '<div style="flex:1;min-width:100px;text-align:center;background:rgba(255,255,255,.06);border-radius:9px;padding:9px 6px;font-size:12px;line-height:1.5">'+x+'</div>';}).join('')+'</div>';
+  }
+  function load(){
+    fetch('/ops-status.json?ts='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(render)
+      .catch(function(){render(null);});
+  }
+  load(); setInterval(load, 60000);
 })();
 </script>
 </body>
